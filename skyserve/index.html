@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkyServe Release V1.01</title>
+  <meta name="author" content="Joseph Midnight - Noktomezo">
+    <style>
+        :root {
+            --bg: #121212; --card: #1e1e1e; --text: #ffffff;
+            --accent: #3498db; --aa-red: #c3002f; --dl-blue: #003366; --ua-blue: #005daa;
+            --order-green: #2ecc71; --btn-gray: #3a3a3a; --modifier: #f1c40f; --meal-orange: #d35400;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; padding-bottom: 100px; }
+        .header { padding: 15px; background: var(--card); border-bottom: 1px solid #333; text-align: center; position: sticky; top: 0; z-index: 10; }
+        .carrier-toggles { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+        .carrier-btn { padding: 8px 12px; border-radius: 20px; border: none; font-weight: bold; font-size: 11px; opacity: 0.4; color: white; }
+        .carrier-btn.active { opacity: 1; transform: scale(1.05); border: 1px solid white; }
+        .aa { background: var(--aa-red); } .dl { background: var(--dl-blue); } .ua { background: var(--ua-blue); }
+        
+        .inventory-bar { display: flex; justify-content: space-around; background: #222; padding: 10px; border-bottom: 1px solid #333; font-size: 12px; }
+        .inv-count { font-weight: bold; color: var(--order-green); font-size: 14px; margin-left: 5px; }
+        
+        .global-controls { display: flex; justify-content: center; align-items: center; gap: 10px; background: #252525; padding: 8px; font-size: 11px; }
+
+        .cabin { padding: 8px; max-width: 450px; margin: 0 auto; display: block; }
+        .row { display: flex; justify-content: center; align-items: flex-start; margin-bottom: 12px; width: 100%; }
+        .seat { width:110px; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; margin: 3px; border: 1px solid #444; box-sizing: border-box; }
+        .seat.has-order { border-color: var(--order-green); background: #1a241a; }
+        .aisle { width: 30px; flex-shrink: 0; }
+        .seat-label { font-weight: bold; color: var(--accent); font-size: 16px; }
+        .pax-name { font-size: 10px; color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .order-display { font-size: 10px; margin-top: 4px; line-height: 1.2; color: #ddd; }
+
+        .panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; padding: 15px; transform: translateY(100%); transition: 0.3s; z-index: 100; max-height: 85vh; overflow-y: auto; }
+        .panel.open { transform: translateY(0); }
+        .overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; z-index: 90; }
+        
+        .mod-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2c3e50; width: 90%; max-width: 320px; border-radius: 15px; padding: 15px; z-index: 110; visibility: hidden; opacity: 0; border: 2px solid var(--modifier); }
+        .mod-panel.active { visibility: visible; opacity: 1; }
+        
+        .stepper-row { display: flex; align-items: center; justify-content: space-between; background: #34495e; margin-bottom: 6px; padding: 8px; border-radius: 8px; }
+        .step-btn { background: #1e1e1e; color: white; border: 1px solid #555; width: 35px; height: 35px; border-radius: 50%; font-size: 20px; }
+        
+               .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .menu-item { flex: 0 0 31%; background: var(--btn-gray); padding: 14px 2px; border-radius: 8px; text-align: center; font-size: 11px; border: none; color: white; font-weight: bold; }
+
+        .menu-item:active { background: #555; }
+        
+        .folder-btn { background: #2980b9; } 
+        .direct-btn { background: #27ae60; } 
+        .meal-btn { background: var(--meal-orange); }
+        
+        .close-btn { background: var(--order-green); padding: 16px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-top: 15px; color: black; }
+        .back-btn { background: #555; padding: 12px; border-radius: 8px; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; color: white; }
+    </style>
+</head>
+<body>
+    <div id="overlay" class="overlay" onclick="closePanel()"></div>
+<div id="side-indicator" style="position: fixed; top: 0; left: 0; bottom: 0; width: 6px; z-index: 1000; background-color: var(--aa-red); transition: background-color 0.3s;"></div>
+  <div id="mod-info" class="mod-panel" style="max-height: 80vh; overflow-y: auto;">
+        <h3 style="color: var(--accent); margin-top:0; text-align:center;">Galley FAQ</h3>
+        <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
+            <p><strong style="color:var(--modifier)">🍹 Adding Drinks:</strong> Tap Seat, Select Drink, If it has another question that will pop up, when finished with seat hit save and close to move on to next seat.</p>
+            <p><strong style="color:var(--order-green)">⌨️ Uncommon/Custom Orders:</strong> If a passenger asks for something odd, just tap the <strong>Other ⌨️</strong> button on the main drink screen to type it in manually.</p>
+            <p><strong style="color:var(--meal-orange)">🍱 Meals & Inventory:</strong> Check the "Meals" box at the top to show the food buttons. Tap Edit to Change names of the meals to what they are. Then enter number loaded. If you accidentally add one and hit "Clear Seat," the meal goes back into your inventory.</p>
+<p><strong style="color:var(--meal-orange)">📩 Feedback:</strong> <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none;">GalleyOS</a></p>
+        
+        </div>
+        <button class="close-btn" onclick="closeMod()">GOT IT</button>
+    </div>
+  
+    <div id="mod-coffee" class="mod-panel">
+        <h3 id="hot-title" style="text-align:center; color: var(--modifier); margin-top:0;">Prep</h3>
+        <button onclick="saveHotDrink(true)" style="width:100%; padding:12px; margin-bottom:10px; background:#111; color:white; border:1px solid #555; border-radius:8px;">JUST PLAIN</button>
+        <div class="stepper-row"><span>Creamers</span><div><button class="step-btn" onclick="adj('c',-1)">-</button><span id="v-c" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('c',1)">+</button></div></div>
+        <div class="stepper-row"><span>Sugars</span><div><button class="step-btn" onclick="adj('sg',-1)">-</button><span id="v-sg" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sg',1)">+</button></div></div>
+        <div class="stepper-row"><span>Sweetener</span><div><button class="step-btn" onclick="adj('sw',-1)">-</button><span id="v-sw" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sw',1)">+</button></div></div>
+        <button class="close-btn" style="background:var(--modifier); color:black;" onclick="saveHotDrink(false)">ADD DRINK</button>
+        <button class="close-btn" style="background:#c0392b; color:white; margin-top:10px;" onclick="closeMod()">CANCEL</button>
+
+    </div>
+
+    <div id="mod-gen" class="mod-panel">
+        <h3 id="gen-title" style="text-align:center; color: var(--modifier); margin-top:0;">Options</h3>
+        <div id="gen-options" class="menu-grid"></div>
+    </div>
+
+    <div class="header">
+        <strong>E175</strong><button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:22px; height:22px; font-size:12px; margin-left:8px; vertical-align: middle;">?</button>
+        <div class="carrier-toggles">
+            <button class="carrier-btn aa active" onclick="setCarrier('AA')">AA</button>
+            <button class="carrier-btn dl" onclick="setCarrier('DL')">DL</button>
+            <button class="carrier-btn ua" onclick="setCarrier('UA')">UA</button>
+        </div>
+    </div>
+
+    <div id="inv-bar" class="inventory-bar" style="display:none;">
+        <div><span id="lblA">Meal A: </span><span id="cA" class="inv-count">7</span></div>
+        <div><span id="lblB">Meal B: </span><span id="cB" class="inv-count">5</span></div>
+        <button onclick="setInv()" style="background:none; border:none; color:#888; font-size:10px;">[EDIT]</button>
+    </div>
+
+    <div class="global-controls">
+        <span><input type="checkbox" id="mTog" onchange="togMeal()"> Meals</span>
+        <button onclick="togRev()" style="background:#34495e; border:none; color:white; font-size:10px; border-radius:4px; padding:4px 10px; font-weight:bold;">↕️ REVERSE</button>
+        <button onclick="resetAll()" style="background:#c0392b; border:none; color:white; font-size:10px; border-radius:4px; padding:4px 10px; font-weight:bold;">NEW FLIGHT</button>
+    </div>
+
+    <div class="cabin" id="cabin-map"></div>
+
+    <div id="order-panel" class="panel">
+        <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
+        <input type="text" id="p-name" placeholder="Pax Name..." style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+        
+        <div id="m-ui" style="display:none;">
+            <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
+            <div class="menu-grid" style="margin-bottom: 15px;">
+                <button id="bA" class="menu-item meal-btn" onclick="addMeal('A')">Meal A</button>
+                <button id="bB" class="menu-item meal-btn" onclick="addMeal('B')">Meal B</button>
+                <button class="menu-item meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
+            </div>
+        </div>
+
+        <div id="view-main">
+            <div style="font-size:10px; color:#888; margin:0 0 5px 0; letter-spacing: 1px;">DRINKS</div>
+            <div class="menu-grid">
+                <button class="menu-item" onclick="openGen('Water', 'soft')">Water</button>
+                <button class="menu-item" onclick="openHot('Coffee')">Coffee</button>
+                <button class="menu-item" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
+                
+                <button class="menu-item direct-btn" onclick="quickAdd('Just Ice')">Just Ice</button>
+                <button class="menu-item" onclick="quickAdd('Other')">Other ⌨️</button>
+                <button class="menu-item folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
+                
+                <button class="menu-item folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
+                <button class="menu-item folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
+                <button class="menu-item folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
+            </div>
+        </div>
+
+        <div id="view-sub" style="display:none;">
+            <button class="back-btn" onclick="closeSub()">🔙 BACK TO MAIN</button>
+            <div style="font-size:12px; color:#aaa; margin:0 0 8px 0; font-weight:bold; text-transform: uppercase;" id="sub-title">Category</div>
+            <div class="menu-grid" id="sub-items"></div>
+        </div>
+
+        <button class="close-btn" onclick="closePanel()">SAVE & CLOSE</button>
+        <button onclick="clearSeat()" style="width:100%; background:none; color:#ff4757; border:none; margin-top:15px; font-size:11px;">Clear Seat</button>
+    </div>
+
+    <script>
+        let currC = 'AA', selS = null, data = {};
+        let mA = 7, mB = 5, mealNameA = "Meal A", mealNameB = "Meal B";
+        let cQ = {c:0, sg:0, sw:0}, pItem = "";
+        let currentHotDrink = "Coffee"; 
+        let pendingMixer = null; // Powers the smart mixer logic
+        let isReversed = false; // Powers the map flip
+        
+        // V5 SMART MENUS
+        const menus = {
+            AA: { 
+                soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"],
+                juice: ["Orange", "Apple", "Tomato", "Cranberry"],
+                mixers: ["Club", "Lime LC","Berry LC","BMM", "Tonic", "Margarita Mix"],
+                alc: {
+                    beer: ["Bud Light", "XX","IPA","Heineken", "Athletic"],
+                    wine: ["White Wine", "Red Wine"],
+                    sparkling: ["Prosecco"],
+                    liquor: ["Vodka", "Gin", "Rum","Baileys","Jack", "Tequila","Bourbon", "Scotch"]
+                }
+            },
+            DL: { 
+                soda: ["Coke", "Diet Coke", "Coke Zero", "Ginger Ale","Sprite"],
+                juice: ["OJ", "Apple", "Cranberry"],
+                mixers: ["Club","Tonic","BMM"],
+                alc: {
+                    beer: ["Miller Lite","Sweetwater","Voodoo Ranger"],
+                    wine: ["White","Red"],
+                    sparkling: ["Sparkling"],
+                    liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace",]
+                }
+            },
+            UA: { 
+                soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Ginger Ale"],
+                juice: ["Lemonade", "OJ", "Apple", "Cranberry", "Tomato"],
+                mixers: ["Seltzer", "Tonic","AHA Blueberry", "AHA Pineapple", "BMM"],
+                tea: ["Lemon Ginger", "Green Tea", "Black Tea"],
+                alc: {
+                    beer: ["Michelob Ultra", "Stella", "Bell's IPA"],
+                    wine: ["White","Red", "Rose"],
+                    sparkling: ["Sparkling"],
+                    liquor: ["Vodka", "Rum", "Gin","Tequila", "Bailey's", "Jack","Bourbon", "Scotch","Espresso Martini","Vodka Spritz"]
+                }
+            }
+        };
+        
+        // V5 MODIFIER CATEGORIES
+        const mods = { 
+            soft: ["Ice", "No Ice", "Light Ice"], 
+            beer: ["Cup", "Can"],
+            sparkling: ["Solo", "Mixer"],
+            liquor: ["Neat", "Ice", "Mixer"]
+        };
+
+        function render() {
+            const container = document.getElementById('cabin-map');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            // Generate rows and reverse if toggled
+            let rowNums = [1, 2, 3, 4]; // Expanded rows slightly to see the flip better
+            if (isReversed) rowNums.reverse();
+
+// AA uses A, D, F. Delta and United use A, B, C.
+            let seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'B', 'C'] : ['A', 'aisle', 'D', 'F'];
+
+            if (isReversed) seatLayout.reverse();
+
+            rowNums.forEach(r => {
+                const row = document.createElement('div'); 
+                row.className = 'row';
+                seatLayout.forEach(p => {
+                    if (p === 'aisle') {
+                        const aDiv = document.createElement('div');
+                        aDiv.className = 'aisle';
+                        row.appendChild(aDiv);
+                    } else {
+                        const id = r + p;
+                        if (!data[id]) data[id] = { name: '', orders: [] };
+                        const d = data[id];
+                        const sDiv = document.createElement('div');
+                        sDiv.className = `seat ${d.orders.length ? 'has-order' : ''}`;
+                        sDiv.onclick = () => openP(id);
+                        sDiv.innerHTML = `
+                            <div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${d.name}</span></div>
+                            <div class="order-display">${d.orders.map(i => '• ' + i).join('<br>')}</div>
+                        `;
+                        row.appendChild(sDiv);
+                    }
+                });
+                container.appendChild(row);
+            });
+        }
+
+        function togRev() { isReversed = !isReversed; render(); }
+
+        function openP(id) {
+            selS = id; if(!data[id]) data[id] = {name:'', orders:[]};
+            
+            // Reset mixer tracking anytime a new seat is opened
+            pendingMixer = null;
+            document.getElementById('p-title').style.color = '';
+            document.getElementById('p-title').innerText = `Seat ${id}`;
+            document.getElementById('p-name').value = data[id].name;
+            
+            closeSub(); 
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('order-panel').classList.add('open');
+            togMeal();
+        }
+
+        function setCarrier(c) {
+            currC = c; 
+            document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase())));
+            closeSub(); 
+            render(); // Re-render to update seat letters based on airline
+            
+            // UPDATE THE SIDE COLOR INDICATOR
+            const colors = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)' };
+            document.getElementById('side-indicator').style.backgroundColor = colors[c];
+       
+        }
+
+        function quickAdd(item) {
+            if (item === "Other") {
+                let custom = prompt("Enter special request:");
+                if (custom) addOrder(custom);
+            } else {
+                addOrder(item);
+            }
+        }
+
+        function openHot(type) { 
+            currentHotDrink = type; 
+            cQ = {c:0, sg:0, sw:0}; upC(); 
+            document.getElementById('hot-title').innerText = type + " Prep";
+            document.getElementById('mod-coffee').classList.add('active'); 
+        }
+        function adj(t, d) { cQ[t] = Math.max(0, Math.min(5, cQ[t]+d)); upC(); }
+        function upC() { document.getElementById('v-c').innerText = cQ.c; document.getElementById('v-sg').innerText = cQ.sg; document.getElementById('v-sw').innerText = cQ.sw; }
+        
+        function saveHotDrink(isPlain) {
+            let label = currentHotDrink; 
+            if (currentHotDrink === 'Coffee') label = currC === 'DL' ? 'Starbucks' : (currC === 'UA' ? 'illy' : 'Coffee');
+            
+            if (isPlain) addOrder(label + " (Plain)");
+            else {
+                let p = [];
+                if(cQ.c) p.push(cQ.c+' Cr'); if(cQ.sg) p.push(cQ.sg+' Sug'); if(cQ.sw) p.push(cQ.sw+' Swt');
+                addOrder(p.length ? `${label} (${p.join('/')})` : label);
+            }
+            closeMod();
+        }
+
+        function openSub(cat, title) {
+            document.getElementById('view-main').style.display = 'none';
+            document.getElementById('view-sub').style.display = 'block';
+            document.getElementById('sub-title').innerText = title;
+            
+            const container = document.getElementById('sub-items');
+            container.innerHTML = '';
+            
+            // SMART ALCOHOL RENDERING
+            if (cat === 'alc') {
+                const alcData = menus[currC].alc;
+                ['beer', 'wine', 'sparkling', 'liquor'].forEach(subCat => {
+                    if (alcData[subCat] && alcData[subCat].length > 0) {
+                        let lbl = document.createElement('div');
+                        lbl.style.cssText = "font-size:10px; color:#888; margin:10px 0 5px 0; letter-spacing:1px; width:100%; grid-column: span 3; text-transform: uppercase;";
+                        lbl.innerText = subCat;
+                        container.appendChild(lbl);
+
+                        alcData[subCat].forEach(item => {
+                            const btn = document.createElement('button');
+                            btn.className = 'menu-item'; btn.innerText = item;
+                            btn.onclick = () => {
+                                if (subCat === 'wine') addOrder(item); // Direct Add
+                                else openGen(item, subCat); // Opens specific mod menu
+                            };
+                            container.appendChild(btn);
+                        });
+                    }
+                });
+            } else {
+                // STANDARD RENDERING (Sodas, Juices, Mixers)
+                menus[currC][cat].forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.className = 'menu-item'; btn.innerText = item;
+                    btn.onclick = () => {
+                        if (cat === 'soda' || cat === 'mixers') openGen(item, 'soft');
+                        else if (cat === 'juice') addOrder(item); 
+                        else if (cat === 'tea') { closeSub(); openHot(item); }
+                    };
+                    container.appendChild(btn);
+                });
+            }
+        }
+
+        function closeSub() {
+            document.getElementById('view-sub').style.display = 'none';
+            document.getElementById('view-main').style.display = 'block';
+        }
+
+        function openGen(i, t) {
+            pItem = i; const g = document.getElementById('gen-options'); g.innerHTML = '';
+            document.getElementById('gen-title').innerText = i;
+            
+            mods[t].forEach(m => {
+                const b = document.createElement('button'); b.className = 'menu-item'; b.innerText = m;
+                b.onclick = () => { 
+                    // THE MIXER LOGIC
+                    if (m === 'Mixer') {
+                        pendingMixer = pItem;
+                        closeMod();
+                        closeSub();
+                        document.getElementById('p-title').innerText = `Select Mixer for ${pItem}`;
+                        document.getElementById('p-title').style.color = 'var(--modifier)';
+                    } 
+                    // CLEAN LOGIC FOR SOLO WINES
+                    else if (m === 'Solo') {
+                        addOrder(pItem);
+                        closeMod(); closeSub();
+                    }
+                    else {
+                        addOrder(`${pItem} (${m})`); 
+                        closeMod(); closeSub(); 
+                    }
+                };
+g.appendChild(b);
+            });
+            
+                    // --- CANCEL BUTTON ---
+            const cancelBtn = document.createElement('button'); 
+            cancelBtn.className = 'menu-item'; 
+            cancelBtn.style.background = '#c0392b'; 
+            cancelBtn.innerText = 'Cancel';
+            cancelBtn.onclick = () => { pendingMixer = null; closeMod(); };
+            g.appendChild(cancelBtn);
+            // ---------------------
+
+            document.getElementById('mod-gen').classList.add('active');
+        }
+
+        function addOrder(i) { 
+            // If they are picking a mixer for a liquor, combine them!
+            if (pendingMixer) {
+                data[selS].orders.push(`${pendingMixer} & ${i}`);
+                pendingMixer = null; 
+                document.getElementById('p-title').innerText = `Seat ${selS}`;
+                document.getElementById('p-title').style.color = '';
+            } else {
+                data[selS].orders.push(i); 
+            }
+            render(); 
+        }
+        
+        function addMeal(type) {
+            if (type === 'A' && mA > 0) { mA--; addOrder(mealNameA); }
+            else if (type === 'B' && mB > 0) { mB--; addOrder(mealNameB); }
+            upInv();
+        }
+
+        function upInv() {
+            document.getElementById('cA').innerText = mA; document.getElementById('cB').innerText = mB;
+            if(document.getElementById('bA')) {
+                document.getElementById('bA').innerText = mealNameA;
+                document.getElementById('bA').disabled = mA <= 0; 
+            }
+            if(document.getElementById('bB')) {
+                document.getElementById('bB').innerText = mealNameB;
+                document.getElementById('bB').disabled = mB <= 0;
+            }
+        }
+
+        function togMeal() {
+            let en = document.getElementById('mTog').checked;
+            document.getElementById('inv-bar').style.display = en ? 'flex' : 'none';
+            document.getElementById('m-ui').style.display = en ? 'block' : 'none';
+            upInv();
+        }
+
+        function setInv() { 
+            let nameA = prompt("Name for Meal Option A?", mealNameA) || mealNameA;
+            let countA = prompt(`How many ${nameA}s?`, mA);
+            let nameB = prompt("Name for Meal Option B?", mealNameB) || mealNameB;
+            let countB = prompt(`How many ${nameB}s?`, mB);
+
+            mealNameA = nameA;
+            if(countA !== null && !isNaN(countA)) mA = parseInt(countA);
+            mealNameB = nameB;
+            if(countB !== null && !isNaN(countB)) mB = parseInt(countB);
+            
+            document.getElementById('lblA').innerText = mealNameA + ": ";
+            document.getElementById('lblB').innerText = mealNameB + ": ";
+            upInv(); 
+        }
+
+        function closeMod() { document.querySelectorAll('.mod-panel').forEach(p=>p.classList.remove('active')); }
+        function closePanel() { 
+            pendingMixer = null; // Failsafe reset
+            document.getElementById('p-title').style.color = '';
+            data[selS].name = document.getElementById('p-name').value; 
+            document.getElementById('order-panel').classList.remove('open'); 
+            document.getElementById('overlay').style.display = 'none'; 
+            closeMod(); render(); 
+        }
+
+        function clearSeat() { 
+            data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); 
+            data[selS].orders = []; upInv(); render(); 
+        }
+
+        function resetAll() { if(confirm("Clear all names, orders, and reset meals for the next leg?")) { data = {}; mA = 7; mB = 5; render(); upInv(); } }
+
+        window.onload = function() {
+            setCarrier('AA');
+            render();
+        };
+    </script>
+</body>
+</html>
