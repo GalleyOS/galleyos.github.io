@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>E175 Galley Restock</title>
+    <style>
+        :root {
+            --bg: #121212; --card: #1e1e1e; --text: #ffffff;
+            --aa-red: #c3002f; --empty: #2a2a2a; --btn-gray: #3a3a3a; --success: #2ecc71;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; user-select: none; }
+        
+        .header { padding: 15px; background: var(--aa-red); text-align: center; font-weight: bold; font-size: 18px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+
+        /* Page Sliding System */
+        .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* The Drawer Wrapper */
+        .drawer {
+            background: #111; border: 4px solid #333; border-radius: 12px; padding: 15px;
+            max-width: 360px; margin: 0 auto;
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+        }
+
+        /* The Cans */
+        .can {
+            aspect-ratio: 1 / 1; border-radius: 50%; border: none; color: white;
+            font-size: 11px; font-weight: bold; cursor: pointer;
+            box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4); transition: 0.15s;
+        }
+        
+        /* Drink Colors (Defaults) */
+        .coke { background: #e74c3c; } .diet { background: #bdc3c7; color: #333; }
+        .sprite { background: var(--success); } .ginger { background: #f39c12; }
+
+        /* Empty State */
+        .can.empty { background: var(--empty) !important; box-shadow: inset 0 3px 8px rgba(0,0,0,0.8) !important; color: #555 !important; border: 1px dashed #444; }
+
+        /* Cabinet Steppers */
+        .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 12px 15px; margin-bottom: 10px; border-radius: 10px; max-width: 360px; margin-left: auto; margin-right: auto; }
+        .item-name { font-size: 16px; font-weight: 500; }
+        .stepper { display: flex; align-items: center; gap: 15px; }
+        .step-btn { background: var(--btn-gray); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; }
+        .count-display { font-size: 20px; font-weight: bold; width: 30px; text-align: center; color: #f1c40f; }
+
+        /* Tally Board & Interactive Checklist */
+        .tally-board { max-width: 360px; margin: 0 auto; background: var(--card); padding: 20px; border-radius: 10px; }
+        .tally-category { color: #888; font-size: 12px; margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; margin-bottom: 10px; }
+        
+        /* The Checkbox Design */
+        .check-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; font-size: 16px; }
+        .check-item:last-child { border-bottom: none; }
+        .check-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 6px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
+        
+        /* The Crossed-Out State */
+        .check-item.crossed { text-decoration: line-through; opacity: 0.4; }
+        .check-item.crossed .check-box { background: var(--success); border-color: var(--success); }
+        .check-item.crossed .check-box::after { content: '✔'; color: #111; font-weight: bold; font-size: 16px; }
+
+        /* Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; display: flex; justify-content: space-between; border-top: 1px solid #333; }
+        .nav-btn { background: var(--btn-gray); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .nav-btn.next { background: var(--aa-red); }
+    </style>
+</head>
+<body>
+
+    <div class="header" id="app-header">Drawer 1: Sodas</div>
+
+    <div id="page-1" class="page active">
+        <div class="drawer">
+            <button class="can" style="background:#222; color:white;" onclick="toggleCan(this, 'Coke Zero', 'drawer')">Coke Zero</button>
+            <button class="can coke" onclick="toggleCan(this, 'Coke', 'drawer')">Coke</button>
+            <button class="can" style="background:#7b241c; color:white;" onclick="toggleCan(this, 'Diet Dr Pepper', 'drawer')">Diet DP</button>
+            <button class="can ginger" onclick="toggleCan(this, 'Ginger Ale', 'drawer')">GA</button>
+            <button class="can" style="background:#222; color:white;" onclick="toggleCan(this, 'Coke Zero', 'drawer')">Coke Zero</button>
+            <button class="can coke" onclick="toggleCan(this, 'Coke', 'drawer')">Coke</button>
+            <button class="can" style="background:#1abc9c; color:white;" onclick="toggleCan(this, 'Sprite Zero', 'drawer')">Sprite Zero</button>
+            <button class="can ginger" onclick="toggleCan(this, 'Ginger Ale', 'drawer')">GA</button>
+            <button class="can diet" onclick="toggleCan(this, 'Diet Coke', 'drawer')">Diet</button>
+            <button class="can coke" onclick="toggleCan(this, 'Coke', 'drawer')">Coke</button>
+            <button class="can" style="background:#7b241c; color:white;" onclick="toggleCan(this, 'Dr Pepper', 'drawer')">Dr Pepper</button>
+            <button class="can ginger" onclick="toggleCan(this, 'Ginger Ale', 'drawer')">GA</button>
+            <button class="can diet" onclick="toggleCan(this, 'Diet Coke', 'drawer')">Diet</button>
+            <button class="can coke" onclick="toggleCan(this, 'Coke', 'drawer')">Coke</button>
+            <button class="can sprite" onclick="toggleCan(this, 'Sprite', 'drawer')">Sprite</button>
+            <button class="can ginger" onclick="toggleCan(this, 'Ginger Ale', 'drawer')">GA</button>
+            <button class="can diet" onclick="toggleCan(this, 'Diet Coke', 'drawer')">Diet</button>
+            <button class="can coke" onclick="toggleCan(this, 'Coke', 'drawer')">Coke</button>
+            <button class="can sprite" onclick="toggleCan(this, 'Sprite', 'drawer')">Sprite</button>
+            <button class="can ginger" onclick="toggleCan(this, 'Ginger Ale', 'drawer')">GA</button>
+        </div>
+    </div>
+
+    <div id="page-2" class="page">
+        <div class="drawer">
+            <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#f1c40f; color:#333;" onclick="toggleCan(this, 'Tonic Water', 'drawer')">Tonic</button>
+            <button class="can" style="background:#e67e22; color:white;" onclick="toggleCan(this, 'BMM', 'drawer')">BMM</button>
+            <button class="can" style="background:#e67e22; color:white;" onclick="toggleCan(this, 'BMM', 'drawer')">BMM</button>
+            <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#f1c40f; color:#333;" onclick="toggleCan(this, 'Tonic Water', 'drawer')">Tonic</button>
+            <button class="can" style="background:#e67e22; color:white;" onclick="toggleCan(this, 'BMM', 'drawer')">BMM</button>
+            <div style="visibility:hidden;"></div> <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#f1c40f; color:#333;" onclick="toggleCan(this, 'Tonic Water', 'drawer')">Tonic</button>
+            <button class="can" style="background:#2ecc71; color:#333;" onclick="toggleCan(this, 'Margarita Mix', 'drawer')">Marg Mix</button>
+            <button class="can" style="background:#2ecc71; color:#333;" onclick="toggleCan(this, 'Margarita Mix', 'drawer')">Marg Mix</button>
+            <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#2ecc71; color:#333;" onclick="toggleCan(this, 'Margarita Mix', 'drawer')">Marg Mix</button>
+            <button class="can" style="background:#9b59b6; color:white;" onclick="toggleCan(this, 'LaCroix Berry', 'drawer')">Berry</button>
+            <button class="can" style="background:#9b59b6; color:white;" onclick="toggleCan(this, 'LaCroix Berry', 'drawer')">Berry</button>
+            <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#dc1da4; color:white;" onclick="toggleCan(this, 'Cranapple', 'drawer')">Cran</button>
+            <button class="can" style="background:#dc1da4; color:white;" onclick="toggleCan(this, 'Cranapple', 'drawer')">Cran</button>
+            <button class="can" style="background:#1abc9c; color:white;" onclick="toggleCan(this, 'LaCroix Lime', 'drawer')">Lime</button>
+            <button class="can" style="background:#3498db; color:white;" onclick="toggleCan(this, 'Club Soda', 'drawer')">Club</button>
+            <button class="can" style="background:#dc1da4; color:white;" onclick="toggleCan(this, 'Cranapple', 'drawer')">Cran</button>
+            <button class="can" style="background:#e74c3c; color:white;" onclick="toggleCan(this, 'Tomato Juice', 'drawer')">Tomato</button>
+            <button class="can" style="background:#1abc9c; color:white;" onclick="toggleCan(this, 'LaCroix Lime', 'drawer')">Lime</button>
+        </div>
+    </div>
+
+    <div id="page-3" class="page">
+        <p style="text-align:center; color:#888; margin-top:0;">Tap '+' for how many you NEED</p>
+        
+        <div class="item-row">
+            <span class="item-name">Water Bottles (1L)</span>
+            <div class="stepper">
+                <button class="step-btn" onclick="adjCab('Water Bottles', -1)">-</button>
+                <span class="count-display" id="val-Water Bottles">0</span>
+                <button class="step-btn" onclick="adjCab('Water Bottles', 1)">+</button>
+            </div>
+        </div>
+        <div class="item-row">
+            <span class="item-name">Hot Cups (Sleeves)</span>
+            <div class="stepper">
+                <button class="step-btn" onclick="adjCab('Hot Cups', -1)">-</button>
+                <span class="count-display" id="val-Hot Cups">0</span>
+                <button class="step-btn" onclick="adjCab('Hot Cups', 1)">+</button>
+            </div>
+        </div>
+        <div class="item-row">
+            <span class="item-name">Cold Cups (Sleeves)</span>
+            <div class="stepper">
+                <button class="step-btn" onclick="adjCab('Cold Cups', -1)">-</button>
+                <span class="count-display" id="val-Cold Cups">0</span>
+                <button class="step-btn" onclick="adjCab('Cold Cups', 1)">+</button>
+            </div>
+        </div>
+        <div class="item-row">
+            <span class="item-name">Napkins (Packs)</span>
+            <div class="stepper">
+                <button class="step-btn" onclick="adjCab('Napkins', -1)">-</button>
+                <span class="count-display" id="val-Napkins">0</span>
+                <button class="step-btn" onclick="adjCab('Napkins', 1)">+</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page-4" class="page">
+        <div class="tally-board" id="tally-board-container">
+            <div id="tally-list"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn" id="btn-prev" onclick="changePage(-1)" style="visibility: hidden;">BACK</button>
+        <button class="nav-btn next" id="btn-next" onclick="changePage(1)">NEXT</button>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const totalPages = 4;
+        const titles = ["Drawer 1: Sodas", "Drawer 2: Juices/Mixers", "Cabinet: Bulk Items", "Stock for Front"];
+        
+        let needs = { drawer: {}, cabinet: {} };
+
+        // Grid Logic
+        function toggleCan(btn, item, category) {
+            btn.classList.toggle('empty');
+            if (!needs[category][item]) needs[category][item] = 0;
+            
+            if (btn.classList.contains('empty')) {
+                needs[category][item]++;
+            } else {
+                needs[category][item]--;
+            }
+        }
+
+        // Cabinet Logic
+        function adjCab(item, amount) {
+            if (!needs.cabinet[item]) needs.cabinet[item] = 0;
+            needs.cabinet[item] = Math.max(0, needs.cabinet[item] + amount);
+            document.getElementById('val-' + item).innerText = needs.cabinet[item];
+        }
+
+        // Page Navigation
+        function changePage(direction) {
+            document.getElementById(`page-${currentPage}`).classList.remove('active');
+            currentPage += direction;
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+
+            // Update UI
+            document.getElementById('app-header').innerText = titles[currentPage-1];
+            document.getElementById('btn-prev').style.visibility = currentPage === 1 ? 'hidden' : 'visible';
+            
+            const nextBtn = document.getElementById('btn-next');
+            if (currentPage === totalPages) {
+                nextBtn.style.display = 'none';
+                generateChecklist();
+            } else {
+                nextBtn.style.display = 'block';
+                nextBtn.innerText = currentPage === 3 ? "FINISH" : "NEXT";
+            }
+        }
+
+        // Strike-through logic for checklist items
+        function toggleCheck(element) {
+            element.classList.toggle('crossed');
+        }
+
+        // Build the final interactive list
+        function generateChecklist() {
+            const listDiv = document.getElementById('tally-list');
+            let html = '';
+            let hasItems = false;
+
+            // Render Drawer Needs
+            let drawerHtml = '';
+            for (let item in needs.drawer) {
+                if (needs.drawer[item] > 0) {
+                    drawerHtml += `
+                        <div class="check-item" onclick="toggleCheck(this)">
+                            <div class="check-box"></div>
+                            <div><span style="color:#e74c3c; font-weight:bold;">${needs.drawer[item]}x</span> ${item}</div>
+                        </div>`;
+                    hasItems = true;
+                }
+            }
+            if (drawerHtml) html += `<div class="tally-category">Drawer Restock (Cans)</div>${drawerHtml}`;
+
+            // Render Cabinet Needs
+            let cabHtml = '';
+            for (let item in needs.cabinet) {
+                if (needs.cabinet[item] > 0) {
+                    cabHtml += `
+                        <div class="check-item" onclick="toggleCheck(this)">
+                            <div class="check-box"></div>
+                            <div><span style="color:#e74c3c; font-weight:bold;">${needs.cabinet[item]}x</span> ${item}</div>
+                        </div>`;
+                    hasItems = true;
+                }
+            }
+            if (cabHtml) html += `<div class="tally-category" style="margin-top:20px;">Cabinet Restock (Bulk)</div>${cabHtml}`;
+
+            if (!hasItems) {
+                listDiv.innerHTML = '<div style="color:var(--success); text-align:center; padding: 20px 0; font-weight:bold;">Fully Stocked! You are cleared for departure.</div>';
+            } else {
+                listDiv.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+</html>
