@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GalleyOS - Toolkit</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --text: #ffffff;
+            --text-muted: #888888;
+            --accent: #3498db;
+        }
+
+        body { 
+            margin: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            padding: 20px; 
+            padding-top: 40px;
+        }
+
+        /* Header Styling */
+        header { 
+            text-align: center; 
+            margin-bottom: 50px; 
+        }
+        h1 { 
+            margin: 0; 
+            font-size: 32px; 
+            font-weight: 800; 
+            letter-spacing: 1.5px; 
+        }
+        .subtitle { 
+            color: var(--text-muted); 
+            font-size: 14px; 
+            margin-top: 8px; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Responsive Grid for the Cards */
+        .toolkit-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 20px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+
+        /* The App Cards */
+        .tool-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid #333;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Hover Animation */
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .icon { 
+            font-size: 36px; 
+            margin-bottom: 15px; 
+        }
+        .tool-title { 
+            font-size: 20px; 
+            font-weight: bold; 
+            margin: 0 0 8px 0; 
+        }
+        .tool-desc { 
+            color: var(--text-muted); 
+            font-size: 14px; 
+            line-height: 1.5; 
+            margin: 0; 
+        }
+
+        /* Coming Soon State */
+        .card-future { 
+            border-style: dashed; 
+            opacity: 0.5; 
+            cursor: default; 
+        }
+        .card-future:hover { 
+            transform: none; 
+            border-color: #333; 
+            box-shadow: none; 
+        }
+
+        /* Footer Signature */
+        footer { 
+            text-align: center; 
+            margin-top: 60px; 
+            color: #555; 
+            font-size: 12px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>GalleyOS</h1>
+        <div class="subtitle">Productivity in the Galley</div>
+    </header>
+
+    <div class="toolkit-grid">
+        
+        <a href="skyserve/index.html" class="tool-card">
+            <div class="icon">📱</div>
+            <h2 class="tool-title">SkyServe</h2>
+            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently.</p>
+        </a>
+
+        <a href="restock/index.html" class="tool-card">
+            <div class="icon">📦</div>
+            <h2 class="tool-title">Restock</h2>
+            <p class="tool-desc">Visual galley inventory. Match the physical drawers to generate instant catering lists.</p>
+        </a>
+
+        <a href="briefing/index.html" class="tool-card">
+            <div class="icon">📖</div>
+            <h2 class="tool-title">Briefing Notes</h2>
+            <p class="tool-desc">Quick-reference digital notepad for pre-flight crew briefings, flight facts, and specials.</p>
+        </a>
+
+        <div class="tool-card card-future">
+            <div class="icon">⏱️</div>
+            <h2 class="tool-title">Service Helper</h2>
+            <p class="tool-desc">Coming soon.</p>
+        </div>
+
+    </div>
+
+    <footer>
+        Built by Joseph Landis • E175 Operations<br>
+        <strong style="color:#888;">Feedback:</strong> 
+        <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none;">✉️ GalleyOS@proton.me</a>
+    </footer>
+
+</body>
+</html>
