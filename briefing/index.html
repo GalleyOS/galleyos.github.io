@@ -5,6 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GalleyOS Briefing</title>
     <style>
+      /* Mini Home Button */
+        .home-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        .home-btn::after {
+            content: '✈';
+            position: absolute;
+            font-size: 14px;
+            bottom: -3px;
+            right: 2px;
+            opacity: 0.3;
+            transform: rotate(-45deg);
+        }
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
             --accent: #3498db; --empty: #2a2a2a; --btn-gray: #3a3a3a; 
@@ -36,13 +63,6 @@
         /* Native Spinners */
         select.input-box { appearance: none; -webkit-appearance: none; background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); background-repeat: no-repeat; background-position-x: 95%; background-position-y: center; }
 
-        /* Interactive Checkboxes */
-        .check-item { display: flex; align-items: center; gap: 15px; background: var(--card); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s; font-size: 16px; margin-bottom: 10px; border: 1px solid #333; }
-        .check-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 6px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
-        .check-item.checked { border-color: var(--accent); }
-        .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
-        .check-item.checked .check-box::after { content: '✔'; color: #111; font-weight: bold; font-size: 16px; }
-
         /* The Ride (Turbulence Toggles) */
         .ride-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
         .ride-btn { padding: 12px 0; border-radius: 8px; border: 2px solid #333; background: var(--card); color: #888; font-weight: bold; font-size: 12px; cursor: pointer; transition: 0.2s; }
@@ -50,6 +70,11 @@
         .ride-btn.active[data-type="light"] { background: var(--light); color: #111; border-color: var(--light); }
         .ride-btn.active[data-type="mod"] { background: var(--mod); color: #111; border-color: var(--mod); }
         .ride-btn.active[data-type="severe"] { background: var(--severe); color: white; border-color: var(--severe); }
+
+        /* Turbulence Timing Toggles */
+        .time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
+        .time-btn { padding: 10px 0; border-radius: 8px; border: 2px solid #333; background: var(--card); color: #888; font-weight: bold; font-size: 11px; cursor: pointer; transition: 0.2s; }
+        .time-btn.active { background: var(--btn-gray); color: white; border-color: var(--accent); }
 
         /* Steppers for Pax */
         .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #333; }
@@ -86,16 +111,6 @@
     <div class="header" id="app-header">1. Crew & Setup</div>
 
     <div id="page-1" class="page active">
-        <div class="section-title">Verification</div>
-        <div class="check-item" onclick="toggleCheck(this)">
-            <div class="check-box"></div>
-            <div>Crew Verification & Intros</div>
-        </div>
-        <div class="check-item" onclick="toggleCheck(this)">
-            <div class="check-box"></div>
-            <div>Manuals & EFB Up to Date</div>
-        </div>
-
         <div class="section-title">Crew Names</div>
         <div class="input-row">
             <input type="text" class="input-box" id="captName" placeholder="Captain">
@@ -127,6 +142,14 @@
             <button class="ride-btn" data-type="light" onclick="setRide(this)">LIGHT</button>
             <button class="ride-btn" data-type="mod" onclick="setRide(this)">MOD</button>
             <button class="ride-btn" data-type="severe" onclick="setRide(this)">SEVERE</button>
+        </div>
+
+        <div style="font-size: 12px; color: #888; margin-bottom: 8px; text-transform: uppercase;">Expected During:</div>
+        <div class="time-grid">
+            <button class="time-btn" onclick="toggleTiming(this)">TAKE OFF</button>
+            <button class="time-btn" onclick="toggleTiming(this)">ASCENT</button>
+            <button class="time-btn" onclick="toggleTiming(this)">CRUISE</button>
+            <button class="time-btn" onclick="toggleTiming(this)">DESCENT</button>
         </div>
 
         <div class="section-title">Aircraft Status</div>
@@ -174,12 +197,14 @@
 
     <div id="page-4" class="page">
         <div id="dashboard-content"></div>
-
         <button class="clear-btn" onclick="clearBoard()">CLEAR FOR NEXT LEG</button>
     </div>
 
-    <div class="bottom-nav">
-        <button class="nav-btn" id="btn-prev" onclick="changePage(-1)" style="visibility: hidden;">BACK</button>
+   <div class="bottom-nav">
+        <a href="../index.html" id="btn-home" class="home-btn" style="display: flex;">G</a>
+        
+        <button class="nav-btn" id="btn-prev" onclick="changePage(-1)" style="display: none;">BACK</button>
+        
         <button class="nav-btn next" id="btn-next" onclick="changePage(1)">NEXT</button>
     </div>
 
@@ -191,6 +216,7 @@
         let paxCounts = { WCHR: 0, UMNR: 0, INF: 0, LEO: 0 };
         let activeRide = "Unknown";
         let rideColor = "#888";
+        let activeTimings = [];
 
         // Auto-populate the Time Spinners on load (15 min increments)
         window.onload = function() {
@@ -221,11 +247,6 @@
             list.appendChild(newInput);
         }
 
-        // Checkbox Logic
-        function toggleCheck(element) {
-            element.classList.toggle('checked');
-        }
-
         // Ride Toggle Logic
         function setRide(clickedBtn) {
             document.querySelectorAll('.ride-btn').forEach(btn => btn.classList.remove('active'));
@@ -236,6 +257,17 @@
             if(activeRide === "LIGHT") rideColor = "#f1c40f";
             if(activeRide === "MOD") rideColor = "#e67e22";
             if(activeRide === "SEVERE") rideColor = "#e74c3c";
+        }
+
+        // Turbulence Timing Logic (Multi-select)
+        function toggleTiming(btn) {
+            btn.classList.toggle('active');
+            const phase = btn.innerText;
+            if (btn.classList.contains('active')) {
+                activeTimings.push(phase);
+            } else {
+                activeTimings = activeTimings.filter(t => t !== phase);
+            }
         }
 
         // Pax Stepper Logic
@@ -253,16 +285,39 @@
                 displaySpan.innerText = 'TAP TO REVEAL';
             }
         }
+// Dashboard Edit Navigation
+        function changePageTo(target) {
+            // Actually change the page
+            document.getElementById(`page-${currentPage}`).classList.remove('active');
+            currentPage = target;
+            document.getElementById(`page-${currentPage}`).classList.add('active');
+            
+            // Update the header
+            document.getElementById('app-header').innerText = titles[currentPage-1];
+            
+            // THE NEW SWAP LOGIC
+            document.getElementById('btn-prev').style.display = currentPage === 1 ? 'none' : 'block';
+            document.getElementById('btn-home').style.display = currentPage === 1 ? 'flex' : 'none';
+            
+            const nextBtn = document.getElementById('btn-next');
+            nextBtn.style.display = 'block';
+            nextBtn.innerText = currentPage === 3 ? "FINISH" : "NEXT";
+        }
 
         // Page Navigation
         function changePage(direction) {
+            // Actually move forward or backward
             document.getElementById(`page-${currentPage}`).classList.remove('active');
             currentPage += direction;
             document.getElementById(`page-${currentPage}`).classList.add('active');
 
+            // Update the header
             document.getElementById('app-header').innerText = titles[currentPage-1];
             
-            document.getElementById('btn-prev').style.visibility = currentPage === 1 ? 'hidden' : 'visible';
+            // THE NEW SWAP LOGIC
+            document.getElementById('btn-prev').style.display = currentPage === 1 ? 'none' : 'block';
+            document.getElementById('btn-home').style.display = currentPage === 1 ? 'flex' : 'none';
+            
             const nextBtn = document.getElementById('btn-next');
             
             if (currentPage === totalPages) {
@@ -286,6 +341,9 @@
             const h = document.getElementById('fltHrs').value || '';
             const m = document.getElementById('fltMins').value || '';
             const timeStr = (h || m) ? `${h} ${m}`.trim() : '--';
+
+            // Format Timing String
+            const timingStr = activeTimings.length > 0 ? activeTimings.join(', ') : '--';
             
             // Gather all dynamic FAs
             let faHtml = '';
@@ -300,16 +358,19 @@
             }
             
             let html = `
-                <div class="dash-card">
+                <div class="dash-card" onclick="changePageTo(2)">
+                    <div style="font-size:10px; color:var(--accent); margin-bottom:5px;">EDIT FACTS ✎</div>
                     <div class="dash-row"><span class="dash-label">Flight Time:</span><span class="dash-value">${timeStr}</span></div>
                     <div class="dash-row"><span class="dash-label">Turbulence:</span><span class="dash-value" style="color:${rideColor};">${activeRide}</span></div>
+                    <div class="dash-row"><span class="dash-label">Expected During:</span><span class="dash-value">${timingStr}</span></div>
                 </div>
 
                 <div class="dash-card">
+                    <div onclick="changePageTo(1)" style="font-size:10px; color:var(--accent); margin-bottom:5px;">EDIT CREW ✎</div>
                     <div class="dash-row"><span class="dash-label">Captain:</span><span class="dash-value">${capt}</span></div>
                     <div class="dash-row"><span class="dash-label">First Officer:</span><span class="dash-value">${fo}</span></div>
                     ${faHtml}
-                    <div class="dash-row clickable" onclick="toggleCode(this, '${code}')">
+                    <div class="dash-row clickable" onclick="event.stopPropagation(); toggleCode(this, '${code}')">
                         <span class="dash-label">Door Code:</span>
                         <span class="dash-value accent code-display">TAP TO REVEAL</span>
                     </div>
@@ -345,26 +406,34 @@
         // Clear Board Logic
         function clearBoard() {
             if(confirm("Clear all briefing notes for the next leg?")) {
+                // Wipe text
                 document.querySelectorAll('.input-box, textarea').forEach(input => input.value = '');
-                document.querySelectorAll('.check-item').forEach(item => item.classList.remove('checked'));
-                document.querySelectorAll('.ride-btn').forEach(btn => btn.classList.remove('active'));
                 
+                // Reset rides and timings
+                document.querySelectorAll('.ride-btn').forEach(btn => btn.classList.remove('active'));
+                activeTimings = [];
+                document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
                 activeRide = "Unknown";
                 rideColor = "#888";
                 
                 // Reset FAs back to a single input
                 document.getElementById('fa-list').innerHTML = '<input type="text" class="input-box fa-input" placeholder="FA 1" style="margin-bottom: 10px;">';
                 
+                // Reset Pax
                 for (let type in paxCounts) {
                     paxCounts[type] = 0;
                     document.getElementById('val-' + type).innerText = '0';
                 }
                 
+                // Jump back to Page 1
                 document.getElementById(`page-${currentPage}`).classList.remove('active');
                 currentPage = 1;
                 document.getElementById(`page-${currentPage}`).classList.add('active');
                 document.getElementById('app-header').innerText = titles[0];
-                document.getElementById('btn-prev').style.visibility = 'hidden';
+                
+                // THE NEW SWAP LOGIC
+                document.getElementById('btn-prev').style.display = 'none';
+                document.getElementById('btn-home').style.display = 'flex';
                 
                 const nextBtn = document.getElementById('btn-next');
                 nextBtn.style.display = 'block';
