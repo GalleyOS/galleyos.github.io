@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Release V1.01</title>
-  <meta name="author" content="Joseph Midnight - Noktomezo">
+    <title>SkyServe Release V1.02</title>
+    <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
@@ -12,7 +12,13 @@
             --order-green: #2ecc71; --btn-gray: #3a3a3a; --modifier: #f1c40f; --meal-orange: #d35400;
         }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; padding-bottom: 100px; }
-        .header { padding: 15px; background: var(--card); border-bottom: 1px solid #333; text-align: center; position: sticky; top: 0; z-index: 10; }
+        
+        .header { padding: 15px; background: var(--card); border-bottom: 1px solid #333; text-align: center; position: sticky; top: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Home Button */
+        .home-btn { background: var(--bg); border: 1px solid #444; color: white; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; text-decoration: none; position: absolute; left: 15px; top: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .home-btn::after { content: '✈'; position: absolute; font-size: 9px; bottom: -1px; right: 2px; opacity: 0.3; transform: rotate(-45deg); }
+
         .carrier-toggles { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
         .carrier-btn { padding: 8px 12px; border-radius: 20px; border: none; font-weight: bold; font-size: 11px; opacity: 0.4; color: white; }
         .carrier-btn.active { opacity: 1; transform: scale(1.05); border: 1px solid white; }
@@ -42,9 +48,8 @@
         .stepper-row { display: flex; align-items: center; justify-content: space-between; background: #34495e; margin-bottom: 6px; padding: 8px; border-radius: 8px; }
         .step-btn { background: #1e1e1e; color: white; border: 1px solid #555; width: 35px; height: 35px; border-radius: 50%; font-size: 20px; }
         
-               .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
         .menu-item { flex: 0 0 31%; background: var(--btn-gray); padding: 14px 2px; border-radius: 8px; text-align: center; font-size: 11px; border: none; color: white; font-weight: bold; }
-
         .menu-item:active { background: #555; }
         
         .folder-btn { background: #2980b9; } 
@@ -57,15 +62,15 @@
 </head>
 <body>
     <div id="overlay" class="overlay" onclick="closePanel()"></div>
-<div id="side-indicator" style="position: fixed; top: 0; left: 0; bottom: 0; width: 6px; z-index: 1000; background-color: var(--aa-red); transition: background-color 0.3s;"></div>
-  <div id="mod-info" class="mod-panel" style="max-height: 80vh; overflow-y: auto;">
+    <div id="side-indicator" style="position: fixed; top: 0; left: 0; bottom: 0; width: 6px; z-index: 1000; background-color: var(--aa-red); transition: background-color 0.3s;"></div>
+    
+    <div id="mod-info" class="mod-panel" style="max-height: 80vh; overflow-y: auto;">
         <h3 style="color: var(--accent); margin-top:0; text-align:center;">Galley FAQ</h3>
         <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
             <p><strong style="color:var(--modifier)">🍹 Adding Drinks:</strong> Tap Seat, Select Drink, If it has another question that will pop up, when finished with seat hit save and close to move on to next seat.</p>
             <p><strong style="color:var(--order-green)">⌨️ Uncommon/Custom Orders:</strong> If a passenger asks for something odd, just tap the <strong>Other ⌨️</strong> button on the main drink screen to type it in manually.</p>
             <p><strong style="color:var(--meal-orange)">🍱 Meals & Inventory:</strong> Check the "Meals" box at the top to show the food buttons. Tap Edit to Change names of the meals to what they are. Then enter number loaded. If you accidentally add one and hit "Clear Seat," the meal goes back into your inventory.</p>
-<p><strong style="color:var(--meal-orange)">📩 Feedback:</strong> <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none;">GalleyOS</a></p>
-        
+            <p><strong style="color:var(--meal-orange)">📩 Feedback:</strong> <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none;">GalleyOS</a></p>
         </div>
         <button class="close-btn" onclick="closeMod()">GOT IT</button>
     </div>
@@ -78,7 +83,6 @@
         <div class="stepper-row"><span>Sweetener</span><div><button class="step-btn" onclick="adj('sw',-1)">-</button><span id="v-sw" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sw',1)">+</button></div></div>
         <button class="close-btn" style="background:var(--modifier); color:black;" onclick="saveHotDrink(false)">ADD DRINK</button>
         <button class="close-btn" style="background:#c0392b; color:white; margin-top:10px;" onclick="closeMod()">CANCEL</button>
-
     </div>
 
     <div id="mod-gen" class="mod-panel">
@@ -87,7 +91,10 @@
     </div>
 
     <div class="header">
-        <strong>E175</strong><button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:22px; height:22px; font-size:12px; margin-left:8px; vertical-align: middle;">?</button>
+        <a href="../index.html" class="home-btn">G</a>
+        <div>
+            <strong>E175</strong><button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:22px; height:22px; font-size:12px; margin-left:8px; vertical-align: middle;">?</button>
+        </div>
         <div class="carrier-toggles">
             <button class="carrier-btn aa active" onclick="setCarrier('AA')">AA</button>
             <button class="carrier-btn dl" onclick="setCarrier('DL')">DL</button>
@@ -112,6 +119,8 @@
     <div id="order-panel" class="panel">
         <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
         <input type="text" id="p-name" placeholder="Pax Name..." style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+        
+        <div id="current-orders-list" style="margin-bottom: 10px;"></div>
         
         <div id="m-ui" style="display:none;">
             <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
@@ -146,7 +155,7 @@
         </div>
 
         <button class="close-btn" onclick="closePanel()">SAVE & CLOSE</button>
-        <button onclick="clearSeat()" style="width:100%; background:none; color:#ff4757; border:none; margin-top:15px; font-size:11px;">Clear Seat</button>
+        <button onclick="clearSeat()" style="width:100%; background:none; color:#ff4757; border:none; margin-top:15px; font-size:11px;">Clear Entire Seat</button>
     </div>
 
     <script>
@@ -154,10 +163,9 @@
         let mA = 7, mB = 5, mealNameA = "Meal A", mealNameB = "Meal B";
         let cQ = {c:0, sg:0, sw:0}, pItem = "";
         let currentHotDrink = "Coffee"; 
-        let pendingMixer = null; // Powers the smart mixer logic
-        let isReversed = false; // Powers the map flip
+        let pendingMixer = null;
+        let isReversed = false; 
         
-        // V5 SMART MENUS
         const menus = {
             AA: { 
                 soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"],
@@ -178,7 +186,7 @@
                     beer: ["Miller Lite","Sweetwater","Voodoo Ranger"],
                     wine: ["White","Red"],
                     sparkling: ["Sparkling"],
-                    liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace",]
+                    liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace"]
                 }
             },
             UA: { 
@@ -195,7 +203,6 @@
             }
         };
         
-        // V5 MODIFIER CATEGORIES
         const mods = { 
             soft: ["Ice", "No Ice", "Light Ice"], 
             beer: ["Cup", "Can"],
@@ -208,13 +215,10 @@
             if(!container) return;
             container.innerHTML = '';
             
-            // Generate rows and reverse if toggled
-            let rowNums = [1, 2, 3, 4]; // Expanded rows slightly to see the flip better
+            let rowNums = [1, 2, 3, 4]; 
             if (isReversed) rowNums.reverse();
 
-// AA uses A, D, F. Delta and United use A, B, C.
             let seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'B', 'C'] : ['A', 'aisle', 'D', 'F'];
-
             if (isReversed) seatLayout.reverse();
 
             rowNums.forEach(r => {
@@ -248,28 +252,51 @@
         function openP(id) {
             selS = id; if(!data[id]) data[id] = {name:'', orders:[]};
             
-            // Reset mixer tracking anytime a new seat is opened
             pendingMixer = null;
             document.getElementById('p-title').style.color = '';
             document.getElementById('p-title').innerText = `Seat ${id}`;
             document.getElementById('p-name').value = data[id].name;
             
+            renderPanelOrders();
             closeSub(); 
             document.getElementById('overlay').style.display = 'block';
             document.getElementById('order-panel').classList.add('open');
             togMeal();
         }
 
+        // Live Order Rendering inside the Panel
+        function renderPanelOrders() {
+            const list = document.getElementById('current-orders-list');
+            list.innerHTML = '';
+            if (data[selS].orders.length > 0) {
+                data[selS].orders.forEach((ord, index) => {
+                    const row = document.createElement('div');
+                    row.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#222; padding:8px 12px; margin-bottom:4px; border-radius:6px; font-size:12px; border:1px solid #333;";
+                    row.innerHTML = `<span>${ord}</span> <button onclick="removeOrder(${index})" style="background:none; border:none; color:#ff4757; font-weight:bold; font-size:16px; padding:0 5px;">✖</button>`;
+                    list.appendChild(row);
+                });
+            }
+        }
+
+        // Remove a single item
+        function removeOrder(index) {
+            let removed = data[selS].orders.splice(index, 1)[0];
+            // Return meal to inventory if it was a meal
+            if (removed === mealNameA) mA++;
+            if (removed === mealNameB) mB++;
+            upInv();
+            render(); 
+            renderPanelOrders();
+        }
+
         function setCarrier(c) {
             currC = c; 
             document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase())));
             closeSub(); 
-            render(); // Re-render to update seat letters based on airline
+            render(); 
             
-            // UPDATE THE SIDE COLOR INDICATOR
             const colors = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)' };
             document.getElementById('side-indicator').style.backgroundColor = colors[c];
-       
         }
 
         function quickAdd(item) {
@@ -311,7 +338,6 @@
             const container = document.getElementById('sub-items');
             container.innerHTML = '';
             
-            // SMART ALCOHOL RENDERING
             if (cat === 'alc') {
                 const alcData = menus[currC].alc;
                 ['beer', 'wine', 'sparkling', 'liquor'].forEach(subCat => {
@@ -325,21 +351,20 @@
                             const btn = document.createElement('button');
                             btn.className = 'menu-item'; btn.innerText = item;
                             btn.onclick = () => {
-                                if (subCat === 'wine') addOrder(item); // Direct Add
-                                else openGen(item, subCat); // Opens specific mod menu
+                                if (subCat === 'wine') addOrder(item); 
+                                else openGen(item, subCat); 
                             };
                             container.appendChild(btn);
                         });
                     }
                 });
             } else {
-                // STANDARD RENDERING (Sodas, Juices, Mixers)
                 menus[currC][cat].forEach(item => {
                     const btn = document.createElement('button');
                     btn.className = 'menu-item'; btn.innerText = item;
                     btn.onclick = () => {
-                        if (cat === 'soda' || cat === 'mixers') openGen(item, 'soft');
-                        else if (cat === 'juice') addOrder(item); 
+                        // Juices now pass to openGen as well
+                        if (cat === 'soda' || cat === 'mixers' || cat === 'juice') openGen(item, 'soft');
                         else if (cat === 'tea') { closeSub(); openHot(item); }
                     };
                     container.appendChild(btn);
@@ -356,19 +381,30 @@
             pItem = i; const g = document.getElementById('gen-options'); g.innerHTML = '';
             document.getElementById('gen-title').innerText = i;
             
+            // --- THE DOUBLE TOGGLE FOR LIQUOR ---
+            if (t === 'liquor') {
+                const dblBtn = document.createElement('button'); 
+                dblBtn.className = 'menu-item'; 
+                dblBtn.style.cssText = 'background:#8e44ad; width:100%; flex: 0 0 100%; margin-bottom: 6px;'; 
+                dblBtn.innerText = 'Make it a Double (x2)';
+                dblBtn.onclick = () => { 
+                    pItem += " x2"; 
+                    document.getElementById('gen-title').innerText = pItem;
+                    dblBtn.style.display = 'none'; // Hide it after selecting
+                };
+                g.appendChild(dblBtn);
+            }
+            
             mods[t].forEach(m => {
                 const b = document.createElement('button'); b.className = 'menu-item'; b.innerText = m;
                 b.onclick = () => { 
-                    // THE MIXER LOGIC
                     if (m === 'Mixer') {
                         pendingMixer = pItem;
-                        closeMod();
-                        closeSub();
+                        closeMod(); closeSub();
                         document.getElementById('p-title').innerText = `Select Mixer for ${pItem}`;
                         document.getElementById('p-title').style.color = 'var(--modifier)';
                     } 
-                    // CLEAN LOGIC FOR SOLO WINES
-                    else if (m === 'Solo') {
+                    else if (m === 'Solo' || m === 'Neat') {
                         addOrder(pItem);
                         closeMod(); closeSub();
                     }
@@ -377,23 +413,20 @@
                         closeMod(); closeSub(); 
                     }
                 };
-g.appendChild(b);
+                g.appendChild(b);
             });
             
-                    // --- CANCEL BUTTON ---
             const cancelBtn = document.createElement('button'); 
             cancelBtn.className = 'menu-item'; 
             cancelBtn.style.background = '#c0392b'; 
             cancelBtn.innerText = 'Cancel';
             cancelBtn.onclick = () => { pendingMixer = null; closeMod(); };
             g.appendChild(cancelBtn);
-            // ---------------------
 
             document.getElementById('mod-gen').classList.add('active');
         }
 
         function addOrder(i) { 
-            // If they are picking a mixer for a liquor, combine them!
             if (pendingMixer) {
                 data[selS].orders.push(`${pendingMixer} & ${i}`);
                 pendingMixer = null; 
@@ -403,6 +436,7 @@ g.appendChild(b);
                 data[selS].orders.push(i); 
             }
             render(); 
+            renderPanelOrders(); // Refresh the live panel view
         }
         
         function addMeal(type) {
@@ -448,7 +482,7 @@ g.appendChild(b);
 
         function closeMod() { document.querySelectorAll('.mod-panel').forEach(p=>p.classList.remove('active')); }
         function closePanel() { 
-            pendingMixer = null; // Failsafe reset
+            pendingMixer = null; 
             document.getElementById('p-title').style.color = '';
             data[selS].name = document.getElementById('p-name').value; 
             document.getElementById('order-panel').classList.remove('open'); 
@@ -458,7 +492,7 @@ g.appendChild(b);
 
         function clearSeat() { 
             data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); 
-            data[selS].orders = []; upInv(); render(); 
+            data[selS].orders = []; upInv(); render(); renderPanelOrders(); 
         }
 
         function resetAll() { if(confirm("Clear all names, orders, and reset meals for the next leg?")) { data = {}; mA = 7; mB = 5; render(); upInv(); } }
