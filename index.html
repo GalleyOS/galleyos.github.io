@@ -127,6 +127,72 @@
             box-shadow: none; 
         }
 
+        /* Changelog Section */
+        .changelog-section {
+            max-width: 800px;
+            margin: 60px auto 20px auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #333;
+        }
+        .changelog-header {
+            font-size: 22px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .log-entry {
+            margin-bottom: 25px;
+            position: relative;
+            padding-left: 20px;
+            border-left: 2px solid #333;
+        }
+        .log-entry:last-child {
+            margin-bottom: 0;
+        }
+        /* The timeline dot */
+        .log-entry::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+        .log-date {
+            font-size: 12px;
+            color: var(--accent);
+            font-weight: bold;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .log-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+        }
+        .log-notes {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+        .log-notes ul {
+            margin: 8px 0 0 0;
+            padding-left: 20px;
+        }
+        .log-notes li {
+            margin-bottom: 4px;
+        }
+
         /* Footer Signature */
         footer { 
             text-align: center; 
@@ -142,7 +208,7 @@
     <header>
         <div class="logo-icon">G</div>
         <h1>GalleyOS</h1>
-        <div class="subtitle">The Curator's Digital Toolkit</div>
+        <div class="subtitle">Helping you make Galley Life Easy</div>
     </header>
 
     <div class="toolkit-grid">
@@ -150,13 +216,13 @@
         <a href="skyserve/index.html" class="tool-card">
             <div class="icon">📱</div>
             <h2 class="tool-title">SkyServe</h2>
-            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently.</p>
+            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently. Currently only for the E175 layout.</p>
         </a>
 
         <a href="restock/index.html" class="tool-card">
             <div class="icon">📦</div>
             <h2 class="tool-title">Restock</h2>
-            <p class="tool-desc">Visual galley inventory. Match the physical drawers to generate instant catering lists.</p>
+            <p class="tool-desc">Visual galley inventory. Match the physical drawers to generate instant catering lists. Currently only for E175 AA setup.</p>
         </a>
 
         <a href="briefing/index.html" class="tool-card">
@@ -171,6 +237,49 @@
             <p class="tool-desc">Coming soon.</p>
         </div>
 
+    </div>
+<div class="changelog-section" style="margin-bottom: -40px;">
+        <h2 class="changelog-header"><span>🎯</span> Project Ethos</h2>
+        <div class="log-notes" style="font-size: 15px; line-height: 1.8;">
+            <p>
+                Welcome to GalleyOS. My name is Joseph. I started this small project one day while sitting in DCA after commuting up and waiting for my report time. I had tinkered with the idea of a way to do first class orders. I usually just did them all without writing them, but then only wrote them if the flight had meals. But then you have to keep a tally of the meals and it's a whole thing. So I had a few hours to kill and decided, hey, there must be a way to make this easier. Thus, this project was born. A simple way to take orders just by tapping. Everything pre-loaded, the most common things already in there and a way for the meal counts to be tracked for me. That has let to a few other ideas and maybe more in the future. I hope it helps you and you enjoy it.
+            </p>
+            <p>
+                On another note - this project was started as, and will always remain, open source. It is a decision I have made and am very happy with. Open source means I am beholden to no one, there are not layers upon layers of people to slog everything down or approve anything. That being said, I am more than open to ideas and suggestions. I have found plenty myself just from using it and from fellow crew. And with it being open source anyone can copy the code, tweak it to their liking and use it. It's a win-win situation for all. I am hoping in the near future to expand this to more cabins and airlines. I have no idea about actual app stores because that's an entirely different ball game. But, we'll see how much learning I'm able to accomplish.
+            </p>
+        </div>
+    </div>
+    <div class="changelog-section">
+        <h2 class="changelog-header"><span>📝</span> Dev Log & Updates</h2>
+        
+        <div class="log-entry">
+            <div class="log-date">April 23, 2026</div>
+            <h3 class="log-title">SkyServe V1.02 & Global UI Sync</h3>
+            <div class="log-notes">
+                Added several highly requested workflow improvements to SkyServe to eliminate tap friction. Unified the navigation across all apps.
+                <ul>
+                    <li><strong>SkyServe:</strong> Added the "Make it a Double" modifier for liquors.</li>
+                    <li><strong>SkyServe:</strong> Added individual item deletion ("X") inside the seat panel.</li>
+                    <li><strong>SkyServe:</strong> Juices now prompt for ice options.</li>
+                    <li><strong>Global:</strong> Implemented the unified "G" home button across Briefing, Restock, and SkyServe to allow seamless jumping back to the Hub.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="log-entry">
+            <div class="log-date">April 22, 2026</div>
+            <h3 class="log-title">Briefing V2 & Restock Expansion</h3>
+            <div class="log-notes">
+                Stripped out the busywork from the Briefing app. Began the architectural overhaul of Restock to support partner airlines.
+                <ul>
+                    <li><strong>Briefing:</strong> Removed the manual verification checkboxes.</li>
+                    <li><strong>Briefing:</strong> Added multi-select timing buttons for turbulence (Take Off, Ascent, Cruise, Descent).</li>
+                    <li><strong>Restock:</strong> Built the new data-driven blueprint system.</li>
+                    <li><strong>Restock:</strong> Added UI toggles and dynamic color themes for American, Delta, and United profiles.</li>
+                </ul>
+            </div>
+        </div>
+        
     </div>
 
     <footer>
