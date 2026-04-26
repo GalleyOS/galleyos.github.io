@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Release V1.02</title>
+    <title>SkyServe Release V1.05</title>
     <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
@@ -31,12 +31,18 @@
 
         .cabin { padding: 8px; max-width: 450px; margin: 0 auto; display: block; }
         .row { display: flex; justify-content: center; align-items: flex-start; margin-bottom: 12px; width: 100%; }
-        .seat { width:110px; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; margin: 3px; border: 1px solid #444; box-sizing: border-box; }
+        
+        /* Seat Styling & Statuses */
+        .seat { width:110px; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; margin: 3px; border: 1px solid #444; box-sizing: border-box; transition: 0.2s; }
         .seat.has-order { border-color: var(--order-green); background: #1a241a; }
+        
+        .seat.status-sleep { background: #111; border-color: #555; opacity: 0.7; }
+        .status-icon { font-size: 32px; text-align: center; margin-top: 15px; opacity: 0.8; }
+
         .aisle { width: 30px; flex-shrink: 0; }
         .seat-label { font-weight: bold; color: var(--accent); font-size: 16px; }
         .pax-name { font-size: 10px; color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .order-display { font-size: 10px; margin-top: 4px; line-height: 1.2; color: #ddd; }
+        .order-display { font-size: 10px; margin-top: 4px; line-height: 1.2; color: #ddd; transition: 0.2s; }
 
         .panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; padding: 15px; transform: translateY(100%); transition: 0.3s; z-index: 100; max-height: 85vh; overflow-y: auto; }
         .panel.open { transform: translateY(0); }
@@ -58,6 +64,15 @@
         
         .close-btn { background: var(--order-green); padding: 16px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-top: 15px; color: black; }
         .back-btn { background: #555; padding: 12px; border-radius: 8px; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; color: white; }
+
+        /* --- LARGE FONT MODE --- */
+        body.large-font .order-display { 
+            font-size: 14px; 
+            margin-top: 6px; 
+            line-height: 1.4; 
+            color: #ffffff; 
+            font-weight: 500; 
+        }
     </style>
 </head>
 <body>
@@ -67,10 +82,12 @@
     <div id="mod-info" class="mod-panel" style="max-height: 80vh; overflow-y: auto;">
         <h3 style="color: var(--accent); margin-top:0; text-align:center;">Galley FAQ</h3>
         <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
-            <p><strong style="color:var(--modifier)">🍹 Adding Drinks:</strong> Tap Seat, Select Drink, If it has another question that will pop up, when finished with seat hit save and close to move on to next seat.</p>
-            <p><strong style="color:var(--order-green)">⌨️ Uncommon/Custom Orders:</strong> If a passenger asks for something odd, just tap the <strong>Other ⌨️</strong> button on the main drink screen to type it in manually.</p>
-            <p><strong style="color:var(--meal-orange)">🍱 Meals & Inventory:</strong> Check the "Meals" box at the top to show the food buttons. Tap Edit to Change names of the meals to what they are. Then enter number loaded. If you accidentally add one and hit "Clear Seat," the meal goes back into your inventory.</p>
-            <p><strong style="color:var(--meal-orange)">📩 Feedback:</strong> <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none;">GalleyOS</a></p>
+            <p><strong style="color:var(--modifier)">🍹 Adding Drinks:</strong> Tap Seat, Select Drink.</p>
+            <p><strong style="color:#888">💤 Statuses:</strong> Mark someone sleeping or skipping. If they wake up and order, just add a drink and the status auto-clears.</p>
+            <p><strong style="color:var(--order-green)">⌨️ Custom Orders:</strong> Tap the <strong>Other ⌨️</strong> button to type it in manually.</p>
+            <p><strong style="color:var(--meal-orange)">🍱 Meals:</strong> Check "Meals" to show food buttons. Tap Edit to set inventory. Clearing a seat returns the meal.</p>
+            <p><strong style="color:var(--accent)">💾 Auto-Save:</strong> Your flight is constantly saved locally. It will not erase until you hit <strong>NEW FLIGHT</strong>.</p>
+<p><strong style="color:var(--accent)">📩 Feedback:</strong> Got ideas or bugs? <a href="mailto:GalleyOS@proton.me" style="color: var(--text); text-decoration: underline;">GalleyOS@proton.me</a></p>
         </div>
         <button class="close-btn" onclick="closeMod()">GOT IT</button>
     </div>
@@ -93,7 +110,9 @@
     <div class="header">
         <a href="../index.html" class="home-btn">G</a>
         <div>
-            <strong>E175</strong><button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:22px; height:22px; font-size:12px; margin-left:8px; vertical-align: middle;">?</button>
+            <strong>E175</strong>
+            <button onclick="toggleFont()" id="font-btn" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s;">A+</button>
+            <button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:12px; margin-left:4px; vertical-align: middle;">?</button>
         </div>
         <div class="carrier-toggles">
             <button class="carrier-btn aa active" onclick="setCarrier('AA')">AA</button>
@@ -129,6 +148,11 @@
                 <button id="bB" class="menu-item meal-btn" onclick="addMeal('B')">Meal B</button>
                 <button class="menu-item meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
             </div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom: 15px;">
+            <button onclick="setSeatStatus('sleep')" style="flex:1; padding:12px; border-radius:8px; border:1px solid #555; background:#111; color:white; font-weight:bold; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4);">💤 Sleeping</button>
+            <button onclick="setSeatStatus('skip')" style="flex:1; padding:12px; border-radius:8px; border:none; background:#34495e; color:white; font-weight:bold; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4);">✅ All Good</button>
         </div>
 
         <div id="view-main">
@@ -210,6 +234,53 @@
             liquor: ["Neat", "Ice", "Mixer"]
         };
 
+        // --- NEW: THE MEMORY BANK (LOCAL STORAGE) ---
+        function saveState() {
+            const state = {
+                currC, data, mA, mB, mealNameA, mealNameB, isReversed,
+                largeFont: document.body.classList.contains('large-font')
+            };
+            localStorage.setItem('skyServeData', JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('skyServeData');
+            if (saved) {
+                const state = JSON.parse(saved);
+                currC = state.currC || 'AA';
+                data = state.data || {};
+                mA = state.mA !== undefined ? state.mA : 7;
+                mB = state.mB !== undefined ? state.mB : 5;
+                mealNameA = state.mealNameA || "Meal A";
+                mealNameB = state.mealNameB || "Meal B";
+                isReversed = state.isReversed || false;
+                
+                if (state.largeFont) {
+                    document.body.classList.add('large-font');
+                    const btn = document.getElementById('font-btn');
+                    btn.style.color = "#fff";
+                    btn.style.borderColor = "#fff";
+                    btn.style.background = "var(--accent)";
+                }
+            }
+        }
+        // --------------------------------------------
+
+        function toggleFont() {
+            document.body.classList.toggle('large-font');
+            const btn = document.getElementById('font-btn');
+            if(document.body.classList.contains('large-font')) {
+                btn.style.color = "#fff";
+                btn.style.borderColor = "#fff";
+                btn.style.background = "var(--accent)";
+            } else {
+                btn.style.color = "#888";
+                btn.style.borderColor = "#888";
+                btn.style.background = "none";
+            }
+            saveState(); // Save preference
+        }
+
         function render() {
             const container = document.getElementById('cabin-map');
             if(!container) return;
@@ -218,7 +289,7 @@
             let rowNums = [1, 2, 3, 4]; 
             if (isReversed) rowNums.reverse();
 
-            let seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'B', 'C'] : ['A', 'aisle', 'D', 'F'];
+            let seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F'];
             if (isReversed) seatLayout.reverse();
 
             rowNums.forEach(r => {
@@ -231,26 +302,43 @@
                         row.appendChild(aDiv);
                     } else {
                         const id = r + p;
-                        if (!data[id]) data[id] = { name: '', orders: [] };
+                        if (!data[id]) data[id] = { name: '', orders: [], status: null };
                         const d = data[id];
+                        
+                        let extraClass = '';
+                        let innerContent = '';
+                        
+                        if (d.status === 'sleep') {
+                            extraClass = 'status-sleep';
+                            innerContent = `<div class="status-icon">💤</div>`;
+                        } else if (d.status === 'skip') {
+                            extraClass = 'status-skip';
+                            innerContent = `<div class="status-icon">✅</div>`;
+                        } else {
+                            extraClass = d.orders.length ? 'has-order' : '';
+                            innerContent = `<div class="order-display">${d.orders.map(i => '• ' + i).join('<br>')}</div>`;
+                        }
+
                         const sDiv = document.createElement('div');
-                        sDiv.className = `seat ${d.orders.length ? 'has-order' : ''}`;
+                        sDiv.className = `seat ${extraClass}`;
                         sDiv.onclick = () => openP(id);
                         sDiv.innerHTML = `
                             <div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${d.name}</span></div>
-                            <div class="order-display">${d.orders.map(i => '• ' + i).join('<br>')}</div>
+                            ${innerContent}
                         `;
                         row.appendChild(sDiv);
                     }
                 });
                 container.appendChild(row);
             });
+            
+            saveState(); // Captures almost every change to the board
         }
 
         function togRev() { isReversed = !isReversed; render(); }
 
         function openP(id) {
-            selS = id; if(!data[id]) data[id] = {name:'', orders:[]};
+            selS = id; if(!data[id]) data[id] = {name:'', orders:[], status: null};
             
             pendingMixer = null;
             document.getElementById('p-title').style.color = '';
@@ -264,7 +352,6 @@
             togMeal();
         }
 
-        // Live Order Rendering inside the Panel
         function renderPanelOrders() {
             const list = document.getElementById('current-orders-list');
             list.innerHTML = '';
@@ -278,15 +365,21 @@
             }
         }
 
-        // Remove a single item
         function removeOrder(index) {
             let removed = data[selS].orders.splice(index, 1)[0];
-            // Return meal to inventory if it was a meal
             if (removed === mealNameA) mA++;
             if (removed === mealNameB) mB++;
             upInv();
             render(); 
             renderPanelOrders();
+        }
+
+        function setSeatStatus(statusType) {
+            data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; });
+            data[selS].orders = [];
+            data[selS].status = statusType;
+            upInv();
+            closePanel(); 
         }
 
         function setCarrier(c) {
@@ -363,7 +456,6 @@
                     const btn = document.createElement('button');
                     btn.className = 'menu-item'; btn.innerText = item;
                     btn.onclick = () => {
-                        // Juices now pass to openGen as well
                         if (cat === 'soda' || cat === 'mixers' || cat === 'juice') openGen(item, 'soft');
                         else if (cat === 'tea') { closeSub(); openHot(item); }
                     };
@@ -381,7 +473,6 @@
             pItem = i; const g = document.getElementById('gen-options'); g.innerHTML = '';
             document.getElementById('gen-title').innerText = i;
             
-            // --- THE DOUBLE TOGGLE FOR LIQUOR ---
             if (t === 'liquor') {
                 const dblBtn = document.createElement('button'); 
                 dblBtn.className = 'menu-item'; 
@@ -390,7 +481,7 @@
                 dblBtn.onclick = () => { 
                     pItem += " x2"; 
                     document.getElementById('gen-title').innerText = pItem;
-                    dblBtn.style.display = 'none'; // Hide it after selecting
+                    dblBtn.style.display = 'none'; 
                 };
                 g.appendChild(dblBtn);
             }
@@ -427,6 +518,8 @@
         }
 
         function addOrder(i) { 
+            data[selS].status = null;
+            
             if (pendingMixer) {
                 data[selS].orders.push(`${pendingMixer} & ${i}`);
                 pendingMixer = null; 
@@ -436,7 +529,7 @@
                 data[selS].orders.push(i); 
             }
             render(); 
-            renderPanelOrders(); // Refresh the live panel view
+            renderPanelOrders(); 
         }
         
         function addMeal(type) {
@@ -455,6 +548,7 @@
                 document.getElementById('bB').innerText = mealNameB;
                 document.getElementById('bB').disabled = mB <= 0;
             }
+            saveState(); // Saves whenever meal counts change
         }
 
         function togMeal() {
@@ -487,19 +581,28 @@
             data[selS].name = document.getElementById('p-name').value; 
             document.getElementById('order-panel').classList.remove('open'); 
             document.getElementById('overlay').style.display = 'none'; 
-            closeMod(); render(); 
+            closeMod(); 
+            render(); // render() triggers the saveState to lock in the name
         }
 
         function clearSeat() { 
             data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); 
-            data[selS].orders = []; upInv(); render(); renderPanelOrders(); 
+            data[selS].orders = []; 
+            data[selS].status = null; 
+            upInv(); render(); renderPanelOrders(); 
         }
 
-        function resetAll() { if(confirm("Clear all names, orders, and reset meals for the next leg?")) { data = {}; mA = 7; mB = 5; render(); upInv(); } }
+        function resetAll() { 
+            if(confirm("Clear all names, orders, and reset meals for the next leg?")) { 
+                data = {}; mA = 7; mB = 5; mealNameA = "Meal A"; mealNameB = "Meal B"; 
+                render(); upInv(); 
+            } 
+        }
 
         window.onload = function() {
-            setCarrier('AA');
-            render();
+            loadState();
+            setCarrier(currC); // Triggers the visual buttons to match loaded data
+            upInv(); // Ensures meal counts display correctly on load
         };
     </script>
 </body>
