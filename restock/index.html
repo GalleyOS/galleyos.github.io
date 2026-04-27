@@ -3,97 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E175 Galley Restock</title>
+    <title>E175 Galley Restock V1.05</title>
     <style>
         :root {
-            /* Core Theme */
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
             --empty: #2a2a2a; --btn-gray: #3a3a3a; --success: #2ecc71;
-            
-            /* Dynamic Airline Colors (Defaults to AA) */
-            --theme-primary: #c3002f; /* AA Red */
-            --theme-accent: #3498db; 
+            --theme-primary: #c3002f; --theme-accent: #3498db; 
         }
-
-        /* Delta Theme Override */
-        body.theme-DL {
-            --theme-primary: #003366; /* DL Navy */
-            --theme-accent: #e3132c;  /* DL Red */
-        }
-
-        /* United Theme Override */
-        body.theme-UA {
-            --theme-primary: #002244; /* UA Blue */
-            --theme-accent: #dca615;  /* UA Gold */
-        }
+        body.theme-DL { --theme-primary: #003366; --theme-accent: #e3132c; }
+        body.theme-UA { --theme-primary: #002244; --theme-accent: #dca615; }
 
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; user-select: none; }
-        
-        /* The Header & Airline Selector */
         .header { background: var(--theme-primary); padding: 10px 15px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; gap: 10px; transition: background 0.3s; }
         .header-title { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 18px; }
-        
         .airline-toggles { display: flex; background: rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; }
         .air-btn { background: transparent; border: none; color: rgba(255,255,255,0.5); padding: 8px 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .air-btn.active { background: var(--theme-accent); color: white; }
 
-        /* Unified Home Button */
         .home-btn { background: var(--bg); border: 1px solid #444; color: white; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; text-decoration: none; position: absolute; left: 15px; top: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .home-btn::after { content: '✈'; position: absolute; font-size: 9px; bottom: -1px; right: 2px; opacity: 0.3; transform: rotate(-45deg); }
 
-        /* Modal System (Imported from SkyServe) */
         .overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; z-index: 90; }
         .mod-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #2c3e50; width: 90%; max-width: 320px; border-radius: 15px; padding: 15px; z-index: 110; visibility: hidden; opacity: 0; border: 2px solid var(--theme-accent); transition: opacity 0.2s; }
         .mod-panel.active { visibility: visible; opacity: 1; }
         .close-btn { background: var(--success); padding: 16px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-top: 15px; color: black; cursor: pointer; }
 
-        /* Page Sliding System */
         .page { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 
-        /* The Drawer Wrapper */
-        .drawer {
-            background: #111; border: 4px solid #333; border-radius: 12px; padding: 15px;
-            max-width: 360px; margin: 0 auto;
-            display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
-        }
-
-        /* The Cans */
-        .can {
-            aspect-ratio: 1 / 1; border-radius: 50%; border: none; color: white;
-            font-size: 11px; font-weight: bold; cursor: pointer;
-            box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4); transition: 0.15s;
-        }
-        
-        /* Empty State */
+        .drawer { background: #111; border: 4px solid #333; border-radius: 12px; padding: 15px; max-width: 360px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .can { aspect-ratio: 1 / 1; border-radius: 50%; border: none; color: white; font-size: 11px; font-weight: bold; cursor: pointer; box-shadow: inset 0 -3px 5px rgba(0,0,0,0.4); transition: 0.15s; }
         .can.empty { background: var(--empty) !important; box-shadow: inset 0 3px 8px rgba(0,0,0,0.8) !important; color: #555 !important; border: 1px dashed #444; }
 
-        /* Cabinet Steppers */
         .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 12px 15px; margin-bottom: 10px; border-radius: 10px; max-width: 360px; margin-left: auto; margin-right: auto; }
         .item-name { font-size: 16px; font-weight: 500; }
         .stepper { display: flex; align-items: center; gap: 15px; }
         .step-btn { background: var(--btn-gray); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 24px; cursor: pointer; }
         .count-display { font-size: 20px; font-weight: bold; width: 30px; text-align: center; color: var(--theme-accent); transition: color 0.3s;}
 
-        /* Tally Board & Interactive Checklist */
         .tally-board { max-width: 360px; margin: 0 auto; background: var(--card); padding: 20px; border-radius: 10px; }
         .tally-category { color: #888; font-size: 12px; margin-top: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; text-transform: uppercase; margin-bottom: 10px; }
-        
         .check-item { display: flex; align-items: center; gap: 15px; padding: 12px 0; border-bottom: 1px solid #222; cursor: pointer; transition: 0.2s; font-size: 16px; }
-        .check-item:last-child { border-bottom: none; }
-        .check-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 6px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: 0.2s; }
-        
+        .check-box { width: 24px; height: 24px; border: 2px solid #555; border-radius: 6px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
         .check-item.crossed { text-decoration: line-through; opacity: 0.4; }
         .check-item.crossed .check-box { background: var(--success); border-color: var(--success); }
         .check-item.crossed .check-box::after { content: '✔'; color: #111; font-weight: bold; font-size: 16px; }
 
-        /* Navigation */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #333; z-index: 5; }
         .nav-btn { background: var(--btn-gray); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; }
         .nav-btn.next { background: var(--theme-primary); transition: background 0.3s; margin-left: auto; } 
-        
-        /* Reset Button */
         .reset-btn { width: 100%; max-width: 360px; display: block; margin: 20px auto 0; background: #c0392b; color: white; border: none; border-radius: 8px; padding: 15px; font-size: 16px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -103,10 +62,10 @@
     <div id="mod-info" class="mod-panel">
         <h3 style="color: var(--theme-accent); margin-top:0; text-align:center;">Restock FAQ</h3>
         <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px;">
-            <p><strong style="color:var(--theme-accent)">🥤 Drawers:</strong> Tap a can to mark it as empty/needed. It will turn dark.</p>
-            <p><strong style="color:#888">📦 Cabinets:</strong> Use the + and - buttons to log how many of each bulk item you need.</p>
-            <p><strong style="color:var(--success)">✅ Checklist:</strong> Keep hitting NEXT. The final page builds a custom checklist. Tap items to cross them off as you load them.</p>
-            <p><strong style="color:var(--theme-accent)">📩 Feedback:</strong> Got ideas or bugs? <a href="mailto:GalleyOS@proton.me" style="color: var(--text); text-decoration: underline;">GalleyOS@proton.me</a></p>
+            <p><strong style="color:var(--theme-accent)">🥤 Drawers:</strong> Tap a can to mark it as empty. It turns dark and adds to the list.</p>
+            <p><strong style="color:#888">📦 Cabinets:</strong> Use +/- to log bulk items you need.</p>
+            <p><strong style="color:var(--success)">✅ Checklist:</strong> Items save automatically. Cross them off as you load.</p>
+            <p><strong style="color:var(--theme-accent)">💾 Memory:</strong> App remembers your progress until you hit <strong>NEW FLIGHT</strong>.</p>
         </div>
         <button class="close-btn" onclick="closeMod()">GOT IT</button>
     </div>
@@ -115,64 +74,23 @@
         <a href="../index.html" class="home-btn">G</a>
         <div class="header-title">
             <span id="app-title">Drawer 1: Sodas</span>
-            <button onclick="openFAQ()" style="background:none; border:1px solid rgba(255,255,255,0.5); color:rgba(255,255,255,0.8); border-radius:50%; width:22px; height:22px; font-size:12px; vertical-align: middle; cursor:pointer;">?</button>
+            <button onclick="openFAQ()" style="background:none; border:1px solid rgba(255,255,255,0.5); color:rgba(255,255,255,0.8); border-radius:50%; width:22px; height:22px; font-size:12px; vertical-align: middle;">?</button>
         </div>
         <div class="airline-toggles">
-            <button class="air-btn active" onclick="setAirline('AA', this)">AA</button>
-            <button class="air-btn" onclick="setAirline('DL', this)">DL</button>
-            <button class="air-btn" onclick="setAirline('UA', this)">UA</button>
+            <button id="air-AA" class="air-btn active" onclick="setAirline('AA', this)">AA</button>
+            <button id="air-DL" class="air-btn" onclick="setAirline('DL', this)">DL</button>
+            <button id="air-UA" class="air-btn" onclick="setAirline('UA', this)">UA</button>
         </div>
     </div>
 
-    <div id="page-1" class="page active">
-        <div class="drawer" id="drawer-1-grid"></div>
-    </div>
-
-    <div id="page-2" class="page">
-        <div class="drawer" id="drawer-2-grid"></div>
-    </div>
-
+    <div id="page-1" class="page active"><div class="drawer" id="drawer-1-grid"></div></div>
+    <div id="page-2" class="page"><div class="drawer" id="drawer-2-grid"></div></div>
     <div id="page-3" class="page">
         <p style="text-align:center; color:#888; margin-top:0;">Tap '+' for how many you NEED</p>
-        
-        <div class="item-row">
-            <span class="item-name">Water Bottles (1L)</span>
-            <div class="stepper">
-                <button class="step-btn" onclick="adjCab('Water Bottles', -1)">-</button>
-                <span class="count-display" id="val-Water Bottles">0</span>
-                <button class="step-btn" onclick="adjCab('Water Bottles', 1)">+</button>
-            </div>
-        </div>
-        <div class="item-row">
-            <span class="item-name">Hot Cups (Sleeves)</span>
-            <div class="stepper">
-                <button class="step-btn" onclick="adjCab('Hot Cups', -1)">-</button>
-                <span class="count-display" id="val-Hot Cups">0</span>
-                <button class="step-btn" onclick="adjCab('Hot Cups', 1)">+</button>
-            </div>
-        </div>
-        <div class="item-row">
-            <span class="item-name">Cold Cups (Sleeves)</span>
-            <div class="stepper">
-                <button class="step-btn" onclick="adjCab('Cold Cups', -1)">-</button>
-                <span class="count-display" id="val-Cold Cups">0</span>
-                <button class="step-btn" onclick="adjCab('Cold Cups', 1)">+</button>
-            </div>
-        </div>
-        <div class="item-row">
-            <span class="item-name">Napkins (Packs)</span>
-            <div class="stepper">
-                <button class="step-btn" onclick="adjCab('Napkins', -1)">-</button>
-                <span class="count-display" id="val-Napkins">0</span>
-                <button class="step-btn" onclick="adjCab('Napkins', 1)">+</button>
-            </div>
-        </div>
+        <div id="cabinet-steppers"></div>
     </div>
-
     <div id="page-4" class="page">
-        <div class="tally-board" id="tally-board-container">
-            <div id="tally-list"></div>
-        </div>
+        <div class="tally-board"><div id="tally-list"></div></div>
         <button class="reset-btn" onclick="resetApp()">🔄 NEW FLIGHT (RESET)</button>
     </div>
 
@@ -185,25 +103,9 @@
         let currentPage = 1;
         const totalPages = 4;
         const titles = ["Drawer 1: Sodas", "Drawer 2: Juices/Mixers", "Cabinet: Bulk Items", "Stock for Front"];
-        let needs = { drawer: {}, cabinet: {} };
+        let needs = { drawer: {}, cabinet: {}, crossed: [] };
         let currentAirline = 'AA';
 
-        // -----------------------------------------
-        // MODAL LOGIC
-        // -----------------------------------------
-        function openFAQ() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('mod-info').classList.add('active');
-        }
-        
-        function closeMod() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('mod-info').classList.remove('active');
-        }
-
-        // -----------------------------------------
-        // THE DRAWER BLUEPRINTS
-        // -----------------------------------------
         const drawerLayouts = {
             'AA': {
                 drawer1: [
@@ -223,12 +125,8 @@
                 ]
             },
             'DL': {
-                drawer1: [
-                    {c: '#e74c3c', t: 'Coke', n: 'Coke'}, {c: '#e74c3c', t: 'Coke', n: 'Coke'}, {c: '#bdc3c7', textCol: '#333', t: 'Diet', n: 'Diet Coke'}, {c: '#bdc3c7', textCol: '#333', t: 'Diet', n: 'Diet Coke'}
-                ],
-                drawer2: [
-                     {c: '#f39c12', t: 'GA', n: 'Ginger Ale'}, {c: '#f39c12', t: 'GA', n: 'Ginger Ale'}, {c: '#3498db', t: 'Club', n: 'Club Soda'}, {x: true}
-                ]
+                drawer1: [{c: '#e74c3c', t: 'Coke', n: 'Coke'}, {c: '#e74c3c', t: 'Coke', n: 'Coke'}, {c: '#bdc3c7', textCol: '#333', t: 'Diet', n: 'Diet Coke'}, {c: '#bdc3c7', textCol: '#333', t: 'Diet', n: 'Diet Coke'}],
+                drawer2: [{c: '#f39c12', t: 'GA', n: 'Ginger Ale'}, {c: '#f39c12', t: 'GA', n: 'Ginger Ale'}, {c: '#3498db', t: 'Club', n: 'Club Soda'}, {x: true}]
             },
             'UA': {
                 drawer1: [
@@ -248,152 +146,164 @@
             }
         };
 
+        const cabItems = ["Water Bottles", "Hot Cups", "Cold Cups", "Napkins"];
+
+        function saveState() {
+            localStorage.setItem('restockData', JSON.stringify({ currentAirline, needs, currentPage }));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('restockData');
+            if (saved) {
+                const s = JSON.parse(saved);
+                currentAirline = s.currentAirline || 'AA';
+                needs = s.needs || { drawer: {}, cabinet: {}, crossed: [] };
+                currentPage = s.currentPage || 1;
+            }
+        }
+
+        function openFAQ() { document.getElementById('overlay').style.display = 'block'; document.getElementById('mod-info').classList.add('active'); }
+        function closeMod() { document.getElementById('overlay').style.display = 'none'; document.getElementById('mod-info').classList.remove('active'); }
+
         window.onload = function() {
-            renderDrawers();
+            loadState();
+            setAirline(currentAirline, document.getElementById('air-' + currentAirline));
+            buildCabinet();
+            changePage(0); 
         };
 
         function setAirline(code, btn) {
             document.body.className = '';
             if (code !== 'AA') document.body.classList.add(`theme-${code}`);
-            
             document.querySelectorAll('.air-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            
+            if(btn) btn.classList.add('active');
             currentAirline = code;
             renderDrawers();
+            saveState();
         }
 
         function renderDrawers() {
             const d1 = document.getElementById('drawer-1-grid');
             const d2 = document.getElementById('drawer-2-grid');
-            
-            d1.innerHTML = '';
-            d2.innerHTML = '';
-
+            d1.innerHTML = ''; d2.innerHTML = '';
             const layout = drawerLayouts[currentAirline];
             
-            layout.drawer1.forEach(can => {
+            layout.drawer1.forEach((can, i) => {
                 if(can.x) { d1.innerHTML += `<div style="visibility:hidden;"></div>`; } 
                 else {
-                    const textCol = can.textCol ? `color:${can.textCol};` : 'color:white;';
-                    const isEmpty = needs.drawer[can.n] && needs.drawer[can.n] > 0 ? 'empty' : '';
-                    d1.innerHTML += `<button class="can ${isEmpty}" style="background:${can.c}; ${textCol}" onclick="toggleCan(this, '${can.n}', 'drawer')">${can.t}</button>`;
+                    const isEmpty = (needs.drawer[currentAirline + '-d1-' + i]) ? 'empty' : '';
+                    d1.innerHTML += `<button class="can ${isEmpty}" style="background:${can.c}; ${can.textCol?'color:'+can.textCol:''}" onclick="toggleCan(this, ${i}, 'd1')">${can.t}</button>`;
                 }
             });
-
-            layout.drawer2.forEach(can => {
+            layout.drawer2.forEach((can, i) => {
                 if(can.x) { d2.innerHTML += `<div style="visibility:hidden;"></div>`; } 
                 else {
-                    const textCol = can.textCol ? `color:${can.textCol};` : 'color:white;';
-                    const isEmpty = needs.drawer[can.n] && needs.drawer[can.n] > 0 ? 'empty' : '';
-                    d2.innerHTML += `<button class="can ${isEmpty}" style="background:${can.c}; ${textCol}" onclick="toggleCan(this, '${can.n}', 'drawer')">${can.t}</button>`;
+                    const isEmpty = (needs.drawer[currentAirline + '-d2-' + i]) ? 'empty' : '';
+                    d2.innerHTML += `<button class="can ${isEmpty}" style="background:${can.c}; ${can.textCol?'color:'+can.textCol:''}" onclick="toggleCan(this, ${i}, 'd2')">${can.t}</button>`;
                 }
             });
         }
 
-        function toggleCan(btn, item, category) {
+        function toggleCan(btn, idx, dr) {
+            const key = currentAirline + '-' + dr + '-' + idx;
             btn.classList.toggle('empty');
-            if (!needs[category][item]) needs[category][item] = 0;
-            
             if (btn.classList.contains('empty')) {
-                needs[category][item]++;
+                const layout = drawerLayouts[currentAirline][dr === 'd1' ? 'drawer1' : 'drawer2'];
+                needs.drawer[key] = layout[idx].n;
             } else {
-                needs[category][item]--;
+                delete needs.drawer[key];
             }
+            saveState();
+        }
+
+        function buildCabinet() {
+            const container = document.getElementById('cabinet-steppers');
+            container.innerHTML = '';
+            cabItems.forEach(item => {
+                const val = needs.cabinet[item] || 0;
+                container.innerHTML += `
+                    <div class="item-row">
+                        <span class="item-name">${item}</span>
+                        <div class="stepper">
+                            <button class="step-btn" onclick="adjCab('${item}', -1)">-</button>
+                            <span class="count-display" id="val-${item}">${val}</span>
+                            <button class="step-btn" onclick="adjCab('${item}', 1)">+</button>
+                        </div>
+                    </div>`;
+            });
         }
 
         function adjCab(item, amount) {
             if (!needs.cabinet[item]) needs.cabinet[item] = 0;
             needs.cabinet[item] = Math.max(0, needs.cabinet[item] + amount);
             document.getElementById('val-' + item).innerText = needs.cabinet[item];
+            saveState();
         }
 
         function changePage(direction) {
             document.getElementById(`page-${currentPage}`).classList.remove('active');
-            currentPage += direction;
+            currentPage = Math.min(totalPages, Math.max(1, currentPage + direction));
             document.getElementById(`page-${currentPage}`).classList.add('active');
-
             document.getElementById('app-title').innerText = titles[currentPage-1];
-            
-            // Only hide the 'BACK' button if we are on the first page
             document.getElementById('btn-prev').style.display = currentPage === 1 ? 'none' : 'block';
-            
             const nextBtn = document.getElementById('btn-next');
-            if (currentPage === totalPages) {
-                nextBtn.style.display = 'none';
-                generateChecklist();
-            } else {
-                nextBtn.style.display = 'block';
-                nextBtn.innerText = currentPage === 3 ? "FINISH" : "NEXT";
-            }
-        }
-
-        function toggleCheck(element) {
-            element.classList.toggle('crossed');
+            if (currentPage === totalPages) { nextBtn.style.display = 'none'; generateChecklist(); } 
+            else { nextBtn.style.display = 'block'; nextBtn.innerText = currentPage === 3 ? "FINISH" : "NEXT"; }
+            saveState();
         }
 
         function generateChecklist() {
             const listDiv = document.getElementById('tally-list');
             let html = '';
             let hasItems = false;
+            let numColor = (currentAirline === 'AA') ? '#e74c3c' : (currentAirline === 'DL' ? '#e3132c' : '#dca615');
 
-            const rootStyle = getComputedStyle(document.body);
-            let numColor = rootStyle.getPropertyValue('--theme-accent').trim() || '#3498db';
-            if (currentAirline === 'AA') numColor = '#e74c3c'; 
+            // Consolidate drawer counts
+            let counts = {};
+            for (let k in needs.drawer) {
+                let name = needs.drawer[k];
+                counts[name] = (counts[name] || 0) + 1;
+            }
 
             let drawerHtml = '';
-            for (let item in needs.drawer) {
-                if (needs.drawer[item] > 0) {
-                    drawerHtml += `
-                        <div class="check-item" onclick="toggleCheck(this)">
-                            <div class="check-box"></div>
-                            <div><span style="color:${numColor}; font-weight:bold;">${needs.drawer[item]}x</span> ${item}</div>
-                        </div>`;
-                    hasItems = true;
-                }
+            for (let name in counts) {
+                const isCrossed = needs.crossed.includes(name) ? 'crossed' : '';
+                drawerHtml += `<div class="check-item ${isCrossed}" onclick="toggleCheck(this, '${name}')"><div class="check-box"></div><div><span style="color:${numColor}; font-weight:bold;">${counts[name]}x</span> ${name}</div></div>`;
+                hasItems = true;
             }
-            if (drawerHtml) html += `<div class="tally-category">Drawer Restock (Cans)</div>${drawerHtml}`;
+            if (drawerHtml) html += `<div class="tally-category">Drawer Restock</div>${drawerHtml}`;
 
             let cabHtml = '';
             for (let item in needs.cabinet) {
                 if (needs.cabinet[item] > 0) {
-                    cabHtml += `
-                        <div class="check-item" onclick="toggleCheck(this)">
-                            <div class="check-box"></div>
-                            <div><span style="color:${numColor}; font-weight:bold;">${needs.cabinet[item]}x</span> ${item}</div>
-                        </div>`;
+                    const isCrossed = needs.crossed.includes(item) ? 'crossed' : '';
+                    cabHtml += `<div class="check-item ${isCrossed}" onclick="toggleCheck(this, '${item}')"><div class="check-box"></div><div><span style="color:${numColor}; font-weight:bold;">${needs.cabinet[item]}x</span> ${item}</div></div>`;
                     hasItems = true;
                 }
             }
-            if (cabHtml) html += `<div class="tally-category" style="margin-top:20px;">Cabinet Restock (Bulk)</div>${cabHtml}`;
+            if (cabHtml) html += `<div class="tally-category" style="margin-top:20px;">Cabinet Restock</div>${cabHtml}`;
+            listDiv.innerHTML = hasItems ? html : '<div style="color:var(--success); text-align:center; padding: 20px 0; font-weight:bold;">Fully Stocked!</div>';
+        }
 
-            if (!hasItems) {
-                listDiv.innerHTML = '<div style="color:var(--success); text-align:center; padding: 20px 0; font-weight:bold;">Fully Stocked! You are cleared for departure.</div>';
-            } else {
-                listDiv.innerHTML = html;
-            }
+        function toggleCheck(el, name) {
+            el.classList.toggle('crossed');
+            if (el.classList.contains('crossed')) { if (!needs.crossed.includes(name)) needs.crossed.push(name); } 
+            else { needs.crossed = needs.crossed.filter(i => i !== name); }
+            saveState();
         }
 
         function resetApp() {
-            if(confirm("Clear all restocking data for the next flight?")) {
-                needs = { drawer: {}, cabinet: {} };
-
-                document.querySelectorAll('.count-display').forEach(span => {
-                    span.innerText = "0";
-                });
-                
-                renderDrawers();
-
+            if(confirm("Clear all restocking data?")) {
+                needs = { drawer: {}, cabinet: {}, crossed: [] };
+                localStorage.removeItem('restockData');
+                renderDrawers(); buildCabinet();
                 document.getElementById(`page-${currentPage}`).classList.remove('active');
                 currentPage = 1;
                 document.getElementById(`page-1`).classList.add('active');
-
                 document.getElementById('app-title').innerText = titles[0];
                 document.getElementById('btn-prev').style.display = 'none';
-                
-                const nextBtn = document.getElementById('btn-next');
-                nextBtn.style.display = 'block';
-                nextBtn.innerText = "NEXT";
+                document.getElementById('btn-next').style.display = 'block';
+                document.getElementById('btn-next').innerText = "NEXT";
             }
         }
     </script>
