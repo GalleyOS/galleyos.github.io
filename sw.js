@@ -1,5 +1,5 @@
 // Change this version number every time you update your app!
-const CACHE_NAME = 'galleyos-cache-v2'; 
+const CACHE_NAME = 'galleyos-cache-v3'; 
 
 const urlsToCache = [
   './',
