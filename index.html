@@ -354,6 +354,43 @@
             document.getElementById('install-modal').style.display = 'none';
         }
     </script>
+
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById('install-btn');
+
+  // Listen for the secret Chrome install signal
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent Chrome from showing its own unpredictable mini-bar
+    e.preventDefault();
+    // Stash the event so it can be triggered later.
+    deferredPrompt = e;
+    // Show our custom button
+    installBtn.style.display = 'block';
+  });
+
+  // What happens when the user clicks our button
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      // Show the official Android install prompt
+      deferredPrompt.prompt();
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      // We've used the prompt, and can't use it again, throw it away
+      deferredPrompt = null;
+      // Hide the button since they installed it
+      installBtn.style.display = 'none';
+    }
+  });
+
+  // Hide the button if they successfully install it via the menu instead
+  window.addEventListener('appinstalled', () => {
+    installBtn.style.display = 'none';
+    console.log('GalleyOS was successfully installed');
+  });
+</script>
+  
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
