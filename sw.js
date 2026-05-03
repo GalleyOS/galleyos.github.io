@@ -1,5 +1,5 @@
 // Change this version number every time you update your app!
-const CACHE_NAME = 'galleyos-cache-v4'; 
+const CACHE_NAME = 'galleyos-cache-v4.1'; 
 
 const urlsToCache = [
   // The Main Hub Files
