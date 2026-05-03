@@ -1,11 +1,17 @@
 // Change this version number every time you update your app!
-const CACHE_NAME = 'galleyos-cache-v3'; 
+const CACHE_NAME = 'galleyos-cache-v4'; 
 
 const urlsToCache = [
+  // The Main Hub Files
   './',
   './index.html',
   './manifest.json',
-  './logo.png'
+  './logo.png',
+  
+  // The Sub-App Folders
+  './skyserve/index.html',
+  './restock/index.html',
+  './briefing/index.html'
 ];
 
 // Step 1: Install and Cache
