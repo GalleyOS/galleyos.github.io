@@ -268,16 +268,20 @@
         <h2 class="changelog-header"><span>📝</span> Dev Log & Updates</h2>
         
       <div class="dev-log-entry">
-  <h3>GalleyOS V1.10: Native App & Offline Architecture</h3>
-  <p>Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.</p>
-  <ul>
-    <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
-    <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
-    <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
-    <li><strong>iOS Optimization:</strong> Hardcoded Apple-specific &lt;meta&gt; tags and Touch Icons to force Safari to respect the full-screen, native-app environment when added to the home screen.</li>
-    <li><strong>Android Optimization:</strong> Calibrated the architecture to support WebAPK minting and PWABuilder compatibility, ensuring smooth installation regardless of corporate device management or Chrome engagement score barriers.</li>
-  </ul>
-  <p class="log-date">May 3, 2026</p>
+  
+<div class="log-entry">
+    <div class="log-date">May 3, 2026</div>
+    <h3 class="log-title">GalleyOS V1.10: Native App & Offline Architecture</h3>
+    <div class="log-notes">
+        Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.
+        <ul>
+            <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
+            <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
+            <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
+            <li><strong>iOS Optimization:</strong> Hardcoded Apple-specific &lt;meta&gt; tags and Touch Icons to force Safari to respect the full-screen, native-app environment when added to the home screen.</li>
+            <li><strong>Android Optimization:</strong> Calibrated the architecture to support WebAPK minting and PWABuilder compatibility, ensuring smooth installation regardless of corporate device management or Chrome engagement score barriers.</li>
+        </ul>
+    </div>
 </div>
 
       
