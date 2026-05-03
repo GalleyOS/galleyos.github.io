@@ -167,7 +167,7 @@
         <div id="view-main">
             <div style="font-size:10px; color:#888; margin:0 0 5px 0; letter-spacing: 1px;">DRINKS</div>
             <div class="menu-grid">
-                <button class="menu-item" onclick="openGen('Water', 'soft')">Water</button>
+                <button class="menu-item" onclick="openGen('Water', 'water')">Water</button>
                 <button class="menu-item" onclick="openHot('Coffee')">Coffee</button>
                 <button class="menu-item" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
                 
@@ -237,7 +237,8 @@
         };
         
         const mods = { 
-            soft: ["Ice", "No Ice", "Light Ice"], 
+            soft: ["Ice", "No Ice", "Light Ice"],
+            water: ["Ice", "No Ice", "Light Ice", "Hot"],
             beer: ["Cup", "Can"],
             sparkling: ["Solo", "Mixer"],
             liquor: ["Neat", "Ice", "Mixer"]
