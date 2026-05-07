@@ -10,21 +10,21 @@
   "description": "Galley management tools for flight operations.",
   "icons": [
     {
-      "src": "logo.png",
+      "src": "logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "logo.png",
+      "src": "logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "Screenshot.png",
+      "src": "screenshot.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
