@@ -1,1 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TDP Tracker V1.2</title>
+    <style>
+        :root {
+            --bg: #121212; --card: #1e1e1e; --text: #ffffff;
+            --accent: #3498db; --btn-gray: #3a3a3a; 
+            --safe: #2ecc71; --warn: #f1c40f; --danger: #e74c3c;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-bottom: 80px; user-select: none; }
+        .header { padding: 15px; background: var(--accent); text-align: center; font-weight: bold; font-size: 18px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .container { padding: 20px; max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px; }
+        
+        /* Setup Gateway */
+        .setup-card { background: var(--card); border: 1px solid var(--accent); border-radius: 12px; padding: 20px; text-align: center; }
+        .instruction-text { font-size: 14px; color: #ccc; line-height: 1.5; margin-bottom: 20px; text-align: left; }
+        .time-input-wrapper { display: flex; flex-direction: column; gap: 10px; align-items: center; margin-bottom: 20px; }
+        .time-label { font-size: 16px; font-weight: bold; color: var(--safe); }
+        input[type="time"] { background: #111; border: 2px solid #555; color: white; padding: 15px; border-radius: 8px; font-size: 24px; font-weight: bold; text-align: center; width: 80%; outline: none; }
+        input[type="time"]:focus { border-color: var(--accent); }
 
+        /* The Giant Timer */
+        .timer-card { background: var(--card); border: 2px solid #333; border-radius: 12px; padding: 30px 10px; text-align: center; transition: 0.3s; }
+        .timer-display { font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; margin-bottom: 5px; color: var(--safe); }
+        .timer-status { font-size: 14px; font-weight: bold; text-transform: uppercase; color: #aaa; letter-spacing: 1px; }
+        
+        /* Action Buttons */
+        .action-btn { width: 100%; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: bold; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-start { background: var(--safe); color: #111; margin-top: 10px;}
+        .btn-log { background: var(--btn-gray); color: white; border: 1px solid #555; text-align: left; padding-left: 20px; }
+        .btn-log:active { background: #555; }
+        
+        /* Sections & Inputs */
+        .section-title { font-size: 14px; color: #888; text-transform: uppercase; margin-top: 10px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .log-list { background: var(--card); border-radius: 8px; padding: 10px; border: 1px solid #333; min-height: 50px; font-size: 14px; line-height: 1.6; }
+        .log-entry { display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding: 5px 0; }
+        .log-entry:last-child { border-bottom: none; }
+        .log-time { color: var(--accent); font-weight: bold; margin-left: 10px; }
+        
+        .notes-input { background: #111; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; min-height: 80px; resize: vertical; outline: none; font-family: inherit; }
+        .notes-input:focus { border-color: var(--accent); }
+
+        /* End Controls */
+        .btn-email { background: var(--accent); color: white; margin-top: 10px; text-align: center; }
+        .btn-clear { background: transparent; border: 1px solid var(--danger); color: var(--danger); text-align: center; }
+
+        /* Utility Class */
+        .hidden { display: none !important; }
+
+        /* Mini Home Button */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; display: flex; justify-content: space-between; border-top: 1px solid #333; }
+        .home-btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; width: 42px; height: 42px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: 800; text-decoration: none; position: relative; overflow: hidden; }
+        .home-btn::after { content: '✈'; position: absolute; font-size: 14px; bottom: -3px; right: 2px; opacity: 0.3; transform: rotate(-45deg); }
+    </style>
+</head>
+<body>
+
+    <div class="header">TDP Tracker</div>
+
+    <div class="container">
+        
+        <div id="setupView" class="setup-card">
+            <div class="instruction-text">
+                <strong>⚠️ IMPORTANT:</strong> The DOT Tarmac Delay clock officially begins when the brakes are dropped (or door closed, per company manual). <br><br>
+                Please verify the exact legal start time via your <strong>company app or with the flight deck</strong> before starting this tracker.
+            </div>
+            
+            <div class="time-input-wrapper">
+                <div class="time-label">VERIFY START TIME:</div>
+                <input type="time" id="manualTimeInput" required>
+            </div>
+
+            <button class="action-btn btn-start" onclick="startTracker()">CONFIRM & START TRACKING</button>
+        </div>
+
+        <div id="trackerView" class="hidden">
+            <div class="timer-card" id="timerCard">
+                <div class="timer-display" id="timeDisplay">00:00:00</div>
+                <div class="timer-status" id="statusText">TARMAC DELAY ACTIVE</div>
+            </div>
+
+            <div class="section-title">Log Service</div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="action-btn btn-log" onclick="logEvent('Water Service Initiated')">💧 Log Water Service (60 min)</button>
+                <button class="action-btn btn-log" onclick="logEvent('Snack Service Initiated')">🥨 Log Snack Service (90 min)</button>
+                <button class="action-btn btn-log" onclick="logEvent('Drink Service Initiated')">🥤 Log Drink Service (120 min)</button>
+            </div>
+
+            <div class="section-title">Event Log</div>
+            <div class="log-list" id="eventLog">
+                </div>
+
+            <div class="section-title">Flight Notes</div>
+            <textarea id="tdpNotes" class="notes-input" placeholder="Cabin temp, lavatory conditions, pax temperament..." oninput="saveNotes()"></textarea>
+
+            <button class="action-btn btn-email" onclick="emailTDPReport()">✉️ EMAIL NOTES TO SELF</button>
+            <button class="action-btn btn-clear" onclick="clearTracker()">RESET FOR NEXT LEG</button>
+        </div>
+
+    </div>
+
+    <div class="bottom-nav">
+        <a href="../index.html" class="home-btn">G</a>
+    </div>
+
+    <script>
+        let tdpData = JSON.parse(localStorage.getItem('galleyos_tdp')) || { startTime: null, logs: [], notes: "" };
+        let timerInterval;
+
+        // Auto-fill the time input with current time on load
+        function prefillCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('manualTimeInput').value = `${hours}:${minutes}`;
+        }
+
+        function updateDisplay() {
+            if (!tdpData.startTime) return;
+
+            const now = Date.now();
+            const diff = now - tdpData.startTime;
+            
+            if (diff < 0) {
+                 document.getElementById('timeDisplay').innerText = "00:00:00";
+                 return;
+            }
+
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+
+            const hrStr = String(hours).padStart(2, '0');
+            const minStr = String(minutes).padStart(2, '0');
+            const secStr = String(seconds).padStart(2, '0');
+            
+            document.getElementById('timeDisplay').innerText = `${hrStr}:${minStr}:${secStr}`;
+
+            const timerCard = document.getElementById('timerCard');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const statusText = document.getElementById('statusText');
+
+            if (minutes >= 120 || hours >= 2) {
+                timerCard.style.borderColor = "var(--danger)";
+                timeDisplay.style.color = "var(--danger)";
+                statusText.innerText = "DOT VIOLATION LIMIT (120 MIN)";
+                statusText.style.color = "var(--danger)";
+            } else if (minutes >= 90 || hours >= 1 && minutes >= 30) {
+                timerCard.style.borderColor = "var(--warn)";
+                timeDisplay.style.color = "var(--warn)";
+                statusText.innerText = "PREP CARTS (90 MIN WARNING)";
+                statusText.style.color = "var(--warn)";
+            } else {
+                timerCard.style.borderColor = "#333";
+                timeDisplay.style.color = "var(--safe)";
+                statusText.innerText = "TARMAC DELAY ACTIVE";
+                statusText.style.color = "var(--safe)";
+            }
+        }
+
+        function startTracker() {
+            const manualTime = document.getElementById('manualTimeInput').value;
+            if (!manualTime) {
+                alert("Please enter a valid start time.");
+                return;
+            }
+
+            const today = new Date();
+            const [hours, minutes] = manualTime.split(':');
+            today.setHours(hours, minutes, 0, 0);
+
+            if (today.getTime() > Date.now()) {
+                 today.setDate(today.getDate() - 1);
+            }
+
+            if (confirm(`Lock in ${manualTime} as the official start time?`)) {
+                tdpData.startTime = today.getTime();
+                
+                document.getElementById('setupView').classList.add('hidden');
+                document.getElementById('trackerView').classList.remove('hidden');
+
+                logEvent(`TDP Clock Started (Legal Time Logged: ${manualTime})`);
+                
+                timerInterval = setInterval(updateDisplay, 1000);
+                updateDisplay(); 
+            }
+        }
+
+        function logEvent(eventText) {
+            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            tdpData.logs.push({ time: timeStr, text: eventText });
+            saveAndRender();
+        }
+
+        function saveNotes() {
+            tdpData.notes = document.getElementById('tdpNotes').value;
+            localStorage.setItem('galleyos_tdp', JSON.stringify(tdpData));
+        }
+
+        function saveAndRender() {
+            localStorage.setItem('galleyos_tdp', JSON.stringify(tdpData));
+            
+            const logDiv = document.getElementById('eventLog');
+            logDiv.innerHTML = '';
+            
+            if(tdpData.logs.length === 0) {
+                logDiv.innerHTML = '<div style="color:#555; text-align:center;">No events logged yet.</div>';
+            } else {
+                tdpData.logs.forEach(log => {
+                    logDiv.innerHTML += `<div class="log-entry"><span>${log.text}</span><span class="log-time">${log.time}</span></div>`;
+                });
+            }
+        }
+
+        function emailTDPReport() {
+            if (tdpData.logs.length === 0 && !tdpData.notes) {
+                alert("No events or notes to email.");
+                return;
+            }
+            
+            const dateStr = new Date().toLocaleDateString();
+            let bodyText = `Date: ${dateStr}\n\n`;
+            
+            bodyText += `TDP EVENT LOG:\n-------------------\n`;
+            if (tdpData.logs.length > 0) {
+                tdpData.logs.forEach(log => {
+                    bodyText += `${log.time} - ${log.text}\n`;
+                });
+            } else {
+                bodyText += `No services logged.\n`;
+            }
+            
+            bodyText += `\nFLIGHT NOTES:\n-------------------\n`;
+            bodyText += tdpData.notes ? tdpData.notes : "No additional notes.";
+            
+            bodyText += `\n\n-------------------\nGenerated by GalleyOS`;
+            
+            const subject = encodeURIComponent(`TDP Event Report - ${dateStr}`);
+            const body = encodeURIComponent(bodyText);
+            
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function clearTracker() {
+            // The fail-safe double check
+            if(confirm("Did you email these notes to yourself? Clicking OK will permanently delete this log.")) {
+                tdpData = { startTime: null, logs: [], notes: "" };
+                localStorage.removeItem('galleyos_tdp');
+                clearInterval(timerInterval);
+                
+                // Clear the notes box visually
+                document.getElementById('tdpNotes').value = "";
+                
+                document.getElementById('timeDisplay').style.color = "var(--safe)";
+                document.getElementById('timerCard').style.borderColor = "#333";
+                document.getElementById('statusText').style.color = "#aaa";
+                
+                document.getElementById('trackerView').classList.add('hidden');
+                document.getElementById('setupView').classList.remove('hidden');
+                
+                prefillCurrentTime();
+                saveAndRender();
+            }
+        }
+
+        // Initialize on load
+        prefillCurrentTime();
+        
+        if (tdpData.startTime) {
+            document.getElementById('setupView').classList.add('hidden');
+            document.getElementById('trackerView').classList.remove('hidden');
+            
+            // Restore notes if they exist
+            if (tdpData.notes) {
+                document.getElementById('tdpNotes').value = tdpData.notes;
+            }
+            
+            saveAndRender();
+            updateDisplay();
+            timerInterval = setInterval(updateDisplay, 1000);
+        }
+    </script>
+</body>
+</html>
