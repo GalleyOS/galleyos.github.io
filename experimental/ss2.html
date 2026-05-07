@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GalleyOS">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
+    <link rel="manifest" href="/manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SkyServe Experimental V1.20</title>
+    <meta name="author" content="Joseph Midnight - Noktomezo">
+    <style>
+        :root {
+            --bg: #121212; --card: #1e1e1e; --text: #ffffff;
+            --accent: #3498db; --aa-red: #c3002f; --dl-blue: #003366; --ua-blue: #005daa;
+            --order-green: #2ecc71; --btn-gray: #3a3a3a; --modifier: #f1c40f; --meal-orange: #d35400;
+        }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; padding-bottom: 100px; }
+        .header { padding: 15px; background: var(--card); border-bottom: 1px solid #333; text-align: center; position: sticky; top: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; }
+        .home-btn { background: var(--bg); border: 1px solid #444; color: white; width: 34px; height: 34px; border-radius: 8px; display: inline-flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; text-decoration: none; position: absolute; left: 15px; top: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+        .home-btn::after { content: '✈'; position: absolute; font-size: 9px; bottom: -1px; right: 2px; opacity: 0.3; transform: rotate(-45deg); }
+        .carrier-toggles { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
+        .carrier-btn { padding: 8px 12px; border-radius: 20px; border: none; font-weight: bold; font-size: 11px; opacity: 0.4; color: white; }
+        .carrier-btn.active { opacity: 1; transform: scale(1.05); border: 1px solid white; }
+        .aa { background: var(--aa-red); } .dl { background: var(--dl-blue); } .ua { background: var(--ua-blue); }
+        .inventory-bar { display: flex; justify-content: space-around; background: #222; padding: 10px; border-bottom: 1px solid #333; font-size: 12px; }
+        .inv-count { font-weight: bold; color: var(--order-green); font-size: 14px; margin-left: 5px; }
+        .global-controls { display: flex; justify-content: center; align-items: center; gap: 10px; background: #252525; padding: 8px; font-size: 11px; }
+        
+        .cabin { padding: 8px; max-width: 600px; width: 100%; margin: 0 auto; display: block; box-sizing: border-box; }
+        .row { display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 12px; width: 100%; gap: 6px; }
+        .seat { flex: 1; min-width: 0; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; border: 1px solid #444; box-sizing: border-box; transition: 0.2s; }
+        .seat.has-order { border-color: var(--order-green); background: #1a241a; }
+        .seat.status-sleep { background: #111; border-color: #555; opacity: 0.7; }
+        .status-icon { font-size: clamp(24px, 8vw, 36px); text-align: center; margin-top: 15px; opacity: 0.8; }
+        
+        /* Aisle Polish: Row Numbers */
+        .aisle { width: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
+        
+        .seat-label { font-weight: bold; color: var(--accent); font-size: clamp(14px, 4.5vw, 20px); }
+        .pax-name { font-size: clamp(10px, 3vw, 14px); color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .order-display { font-size: clamp(10px, 3.5vw, 15px); margin-top: 4px; line-height: 1.2; color: #ddd; transition: 0.2s; word-wrap: break-word; }
+        
+        /* Panel Polish: Sticky Footer */
+        .panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; padding: 15px 15px 90px 15px; transform: translateY(100%); transition: 0.3s; z-index: 100; max-height: 85vh; overflow-y: auto; }
+        .panel.open { transform: translateY(0); }
+        .panel-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; gap: 5px; z-index: 101; }
+        
+        .overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; z-index: 90; }
+        .mod-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e1e1e; width: 90%; max-width: 320px; border-radius: 15px; padding: 15px; z-index: 110; visibility: hidden; opacity: 0; border: 2px solid var(--accent); transition: 0.2s; max-height: 80vh; overflow-y: auto; }
+        .mod-panel.active { visibility: visible !important; opacity: 1 !important; }
+        .stepper-row { display: flex; align-items: center; justify-content: space-between; background: #34495e; margin-bottom: 6px; padding: 8px; border-radius: 8px; }
+        .step-btn { background: #1e1e1e; color: white; border: 1px solid #555; width: 35px; height: 35px; border-radius: 50%; font-size: 20px; }
+        .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+        .menu-item { flex: 0 0 48%; background: var(--btn-gray); padding: 14px 2px; border-radius: 8px; text-align: center; font-size: 11px; border: none; color: white; font-weight: bold; }
+        .menu-item.small { flex: 0 0 31%; }
+        .menu-item:active { background: #555; }
+        .folder-btn { background: #2980b9; } 
+        .direct-btn { background: #27ae60; } 
+        .meal-btn { background: var(--meal-orange); }
+        .close-btn { background: var(--order-green); padding: 16px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-top: 15px; color: black; cursor: pointer; }
+        .back-btn { background: #555; padding: 12px; border-radius: 8px; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; color: white; }
+        
+        /* History Pills */
+        .history-tag { background: #333; border: 1px solid #555; color: #ddd; padding: 6px 12px; border-radius: 15px; font-size: 11px; cursor: pointer; white-space: nowrap; font-weight: bold; }
+
+        body.large-font .order-display { font-size: clamp(14px, 5vw, 22px); margin-top: 6px; line-height: 1.4; color: #ffffff; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <div id="overlay" class="overlay" onclick="closeMod(); closePanel();"></div>
+    <div id="side-indicator" style="position: fixed; top: 0; left: 0; bottom: 0; width: 6px; z-index: 1000; background-color: var(--aa-red); transition: background-color 0.3s;"></div>
+    
+    <div id="mod-info" class="mod-panel">
+        <h3 style="color: var(--accent); margin-top:0; text-align:center;">SkyServe FAQ</h3>
+        <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px; color: #ddd;">
+            <p><strong style="color:var(--accent)">📐 Layout:</strong> Tap <strong>LAYOUT</strong> to set rows and pattern (1x2 regional, 2x2 mainline).</p>
+            <p><strong style="color:var(--modifier)">🍸 Mixers:</strong> Tap a liquor, then <strong>Mixer</strong>. The title will prompt you to select a soda or juice to bundle.</p>
+            <p><strong style="color:var(--order-green)">📱 Auto-Save:</strong> Every change is saved locally. Data only clears when you hit <strong>NEW FLIGHT</strong>.</p>
+            <p><strong style="color:#888">💤 Statuses:</strong> Mark seats as sleeping/skipped to clear them visually.</p>
+        </div>
+        <button class="close-btn" onclick="closeMod()">GOT IT</button>
+    </div>
+
+    <div id="mod-layout" class="mod-panel">
+        <h3 style="text-align:center; color: var(--accent); margin-top:0;">Cabin Layout</h3>
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Number of Rows</div>
+        <div class="stepper-row" style="margin-bottom: 15px;">
+            <span>FC Rows</span>
+            <div>
+                <button class="step-btn" onclick="adjRows(-1)">-</button>
+                <span id="v-rows" style="margin:0 15px; font-weight:bold; color:var(--accent); font-size: 18px;">4</span>
+                <button class="step-btn" onclick="adjRows(1)">+</button>
+            </div>
+        </div>
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Seat Pattern</div>
+        <div class="menu-grid" style="margin-bottom: 15px;">
+            <button id="pat-1x2" class="menu-item" onclick="setPattern('1x2')">1 x 2 (Regional)</button>
+            <button id="pat-2x2" class="menu-item" onclick="setPattern('2x2')">2 x 2 (Mainline)</button>
+        </div>
+        <button class="close-btn" style="background:var(--order-green); color:black;" onclick="applyLayout()">APPLY & REDRAW</button>
+    </div>
+  
+    <div id="mod-coffee" class="mod-panel">
+        <h3 id="hot-title" style="text-align:center; color: var(--modifier); margin-top:0;">Prep</h3>
+        <button id="hot-plain-btn" onclick="saveHotDrink(true)" style="width:100%; padding:12px; margin-bottom:10px; background:#111; color:white; border:1px solid #555; border-radius:8px;">BLACK</button>
+        <div class="stepper-row"><span>Creamers</span><div><button class="step-btn" onclick="adj('c',-1)">-</button><span id="v-c" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('c',1)">+</button></div></div>
+        <div class="stepper-row"><span>Sugars</span><div><button class="step-btn" onclick="adj('sg',-1)">-</button><span id="v-sg" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sg',1)">+</button></div></div>
+        <div class="stepper-row"><span>Sweetener</span><div><button class="step-btn" onclick="adj('sw',-1)">-</button><span id="v-sw" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sw',1)">+</button></div></div>
+        <button class="close-btn" style="background:var(--modifier); color:black;" onclick="saveHotDrink(false)">ADD DRINK</button>
+        <button class="close-btn" style="background:#c0392b; color:white; margin-top:10px;" onclick="closeMod()">CANCEL</button>
+    </div>
+
+    <div id="mod-gen" class="mod-panel">
+        <h3 id="gen-title" style="text-align:center; color: var(--modifier); margin-top:0;">Options</h3>
+        <div id="gen-options" class="menu-grid"></div>
+    </div>
+
+    <div class="header">
+        <a href="../index.html" class="home-btn">G</a>
+        <div>
+            <button onclick="openLayoutMod()" style="background:#333; border:1px solid #555; color:white; border-radius:6px; padding:6px 12px; font-weight:bold; font-size:12px; transition:0.2s;">LAYOUT ⏷</button>
+            <button onclick="toggleFont()" id="font-btn" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s;">A+</button>
+            <button onclick="document.getElementById('mod-info').classList.add('active'); document.getElementById('overlay').style.display = 'block';" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:12px; margin-left:4px; vertical-align: middle; cursor:pointer;">?</button>
+        </div>
+        <div class="carrier-toggles">
+            <button class="carrier-btn aa active" onclick="setCarrier('AA')">AA</button>
+            <button class="carrier-btn dl" onclick="setCarrier('DL')">DL</button>
+            <button class="carrier-btn ua" onclick="setCarrier('UA')">UA</button>
+        </div>
+    </div>
+
+    <div id="inv-bar" class="inventory-bar" style="display:none;">
+        <div><span id="lblA">Meal A: </span><span id="cA" class="inv-count">7</span></div>
+        <div><span id="lblB">Meal B: </span><span id="cB" class="inv-count">5</span></div>
+        <button onclick="setInv()" style="background:none; border:none; color:#888; font-size:10px;">[EDIT]</button>
+    </div>
+
+    <div class="global-controls">
+        <span><input type="checkbox" id="mTog" onchange="togMeal()"> Meals</span>
+        <button onclick="togRev()" style="background:#34495e; border:none; color:white; font-size:10px; border-radius:4px; padding:4px 10px; font-weight:bold;">↕️ REVERSE</button>
+        <button onclick="resetAll()" style="background:#c0392b; border:none; color:white; font-size:10px; border-radius:4px; padding:4px 10px; font-weight:bold;">NEW FLIGHT</button>
+    </div>
+
+    <div class="cabin" id="cabin-map"></div>
+
+    <div id="order-panel" class="panel">
+        <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
+        <input type="text" id="p-name" placeholder="Pax Name" style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+        <div id="current-orders-list" style="margin-bottom: 10px;"></div>
+        <div id="m-ui" style="display:none;">
+            <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
+            <div class="menu-grid" style="margin-bottom: 15px;">
+                <button id="bA" class="menu-item small meal-btn" onclick="addMeal('A')">Meal A</button>
+                <button id="bB" class="menu-item small meal-btn" onclick="addMeal('B')">Meal B</button>
+                <button class="menu-item small meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
+            </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom: 15px;">
+            <button onclick="setSeatStatus('sleep')" style="flex:1; padding:12px; border-radius:8px; border:1px solid #555; background:#111; color:white; font-weight:bold;">💤 Sleeping</button>
+            <button onclick="setSeatStatus('skip')" style="flex:1; padding:12px; border-radius:8px; border:none; background:#34495e; color:white; font-weight:bold;">✅ All Good</button>
+        </div>
+        <div id="view-main">
+            <div style="font-size:10px; color:#888; margin:0 0 5px 0; letter-spacing: 1px;">DRINKS</div>
+            <div class="menu-grid">
+                <button class="menu-item small" onclick="openGen('Water', 'water')">Water</button>
+                <button class="menu-item small" onclick="openHot('Coffee')">Coffee</button>
+                <button class="menu-item small" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
+                <button class="menu-item small direct-btn" onclick="quickAdd('Just Ice')">Just Ice</button>
+                <button class="menu-item small" onclick="quickAdd('Other')">Other ⌨️</button>
+                <button class="menu-item small folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
+                <button class="menu-item small folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
+                <button class="menu-item small folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
+                <button class="menu-item small folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
+            </div>
+            <div id="recent-others" style="display:flex; gap:5px; margin-top:10px; overflow-x:auto; width:100%; padding-bottom:5px;"></div>
+        </div>
+        <div id="view-sub" style="display:none;">
+            <button class="back-btn" onclick="closeSub()">🔙 BACK</button>
+            <div style="font-size:12px; color:#aaa; margin:0 0 8px 0; font-weight:bold; text-transform: uppercase;" id="sub-title">Category</div>
+            <div class="menu-grid" id="sub-items"></div>
+        </div>
+        
+        <div class="panel-footer">
+            <button class="close-btn" onclick="closePanel()" style="margin-top:0;">SAVE & CLOSE</button>
+            <button onclick="clearSeat()" style="width:100%; background:none; color:#ff4757; border:none; margin-top:5px; font-size:11px;">Clear Entire Seat</button>
+        </div>
+    </div>
+
+    <script>
+        let currC = 'AA', selS = null, data = {};
+        let mA = 7, mB = 5, mealNameA = "Meal A", mealNameB = "Meal B";
+        let cQ = {c:0, sg:0, sw:0}, pItem = "";
+        let currentHotDrink = "Coffee", pendingMixer = null, isReversed = false, cabinRows = 4, cabinPattern = '1x2';
+        
+        // Load custom history
+        let otherHistory = JSON.parse(localStorage.getItem('skyServeOthers')) || [];
+
+        const menus = {
+            AA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"], juice: ["Orange", "Apple", "Tomato", "Cranberry"], mixers: ["Club", "Lime LC","Berry LC","BMM", "Tonic", "Margarita Mix"], alc: { beer: ["Bud Light", "XX","IPA","Heineken", "Athletic"], wine: ["White Wine", "Red Wine"], sparkling: ["Prosecco"], liquor: ["Vodka", "Gin", "Rum","Baileys","Jack", "Tequila","Bourbon", "Scotch"] } },
+            DL: { soda: ["Coke", "Diet Coke", "Coke Zero", "Ginger Ale","Sprite"], juice: ["OJ", "Apple", "Cranberry"], mixers: ["Club","Tonic","BMM"], alc: { beer: ["Miller Lite","Sweetwater","Voodoo Ranger"], wine: ["White","Red"], sparkling: ["Sparkling"], liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace"] } },
+            UA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Ginger Ale"], juice: ["Lemonade", "OJ", "Apple", "Cranberry", "Tomato"], mixers: ["Seltzer", "Tonic","AHA Blueberry", "AHA Pineapple", "BMM"], tea: ["Lemon Ginger", "Green Tea", "Black Tea"], alc: { beer: ["Michelob Ultra", "Stella", "Bell's IPA"], wine: ["White","Red", "Rose"], sparkling: ["Sparkling"], liquor: ["Vodka", "Rum", "Gin","Tequila", "Bailey's", "Jack","Bourbon", "Scotch","Espresso Martini","Vodka Spritz"] } }
+        };
+        const mods = { soft: ["Ice", "No Ice", "Light Ice"], water: ["Ice", "No Ice", "Light Ice", "Hot"], beer: ["Cup", "Can"], sparkling: ["Solo", "Mixer"], liquor: ["Neat", "Ice", "Mixer"] };
+
+        function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(10); }
+
+        function saveState() { 
+            localStorage.setItem('skyServeData', JSON.stringify({ currC, data, mA, mB, mealNameA, mealNameB, isReversed, cabinRows, cabinPattern, largeFont: document.body.classList.contains('large-font') })); 
+            localStorage.setItem('skyServeOthers', JSON.stringify(otherHistory));
+        }
+
+        function loadState() { 
+            const saved = localStorage.getItem('skyServeData'); 
+            if (saved) { 
+                const s = JSON.parse(saved); 
+                currC = s.currC || 'AA'; data = s.data || {}; mA = s.mA ?? 7; mB = s.mB ?? 5; mealNameA = s.mealNameA || "Meal A"; mealNameB = s.mealNameB || "Meal B"; isReversed = s.isReversed || false; cabinRows = s.cabinRows || 4; cabinPattern = s.cabinPattern || '1x2'; 
+                if (s.largeFont) document.body.classList.add('large-font'); 
+            } 
+        }
+
+        function openLayoutMod() { document.getElementById('v-rows').innerText = cabinRows; updatePatternUI(); document.getElementById('mod-layout').classList.add('active'); document.getElementById('overlay').style.display = 'block'; }
+        function adjRows(dir) { cabinRows = Math.max(1, Math.min(10, cabinRows + dir)); document.getElementById('v-rows').innerText = cabinRows; }
+        function setPattern(pat) { cabinPattern = pat; updatePatternUI(); }
+        function updatePatternUI() { ['1x2', '2x2'].forEach(p => { const b = document.getElementById('pat-' + p); b.style.background = cabinPattern === p ? 'var(--accent)' : 'var(--btn-gray)'; b.style.color = cabinPattern === p ? 'white' : '#888'; }); }
+        function applyLayout() { closeMod(); render(); }
+
+        function render() {
+            const container = document.getElementById('cabin-map'); if(!container) return; container.innerHTML = '';
+            let rowNums = Array.from({length: cabinRows}, (_, i) => i + 1); 
+            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
+            if (isReversed) { rowNums.reverse(); seatLayout.reverse(); }
+            rowNums.forEach(r => {
+                const row = document.createElement('div'); row.className = 'row';
+                seatLayout.forEach(p => {
+                    if (p === 'aisle') { 
+                        row.innerHTML += `<div class="aisle">${r}</div>`; 
+                    } else {
+                        const id = r + p; if (!data[id]) data[id] = { name: '', orders: [], status: null };
+                        const d = data[id]; let extra = d.status === 'sleep' ? 'status-sleep' : (d.orders.length ? 'has-order' : '');
+                        let inner = d.status === 'sleep' ? '<div class="status-icon">💤</div>' : (d.status === 'skip' ? '<div class="status-icon">✅</div>' : `<div class="order-display">${d.orders.map(i => '• ' + i).join('<br>')}</div>`);
+                        const s = document.createElement('div'); s.className = `seat ${extra}`; 
+                        s.onclick = () => { haptic(); openP(id); };
+                        s.innerHTML = `<div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${d.name}</span></div>${inner}`; row.appendChild(s);
+                    }
+                });
+                container.appendChild(row);
+            });
+            saveState();
+        }
+
+        function openP(id) { 
+            selS = id; pendingMixer = null; document.getElementById('p-title').style.color = ''; document.getElementById('p-title').innerText = `Seat ${id}`; document.getElementById('p-name').value = data[id].name; 
+            renderPanelOrders(); renderOthers(); closeSub(); 
+            document.getElementById('overlay').style.display = 'block'; document.getElementById('order-panel').classList.add('open'); togMeal(); 
+        }
+
+        function renderPanelOrders() { const l = document.getElementById('current-orders-list'); l.innerHTML = ''; data[selS].orders.forEach((o, i) => { const r = document.createElement('div'); r.style.cssText = "display:flex; justify-content:space-between; align-items:center; background:#222; padding:8px 12px; margin-bottom:4px; border-radius:6px; font-size:12px; border:1px solid #333;"; r.innerHTML = `<span>${o}</span> <button onclick="removeOrder(${i})" style="background:none; border:none; color:#ff4757; font-weight:bold; font-size:16px; padding:0 5px;">✖</button>`; l.appendChild(r); }); }
+        
+        function renderOthers() {
+            const container = document.getElementById('recent-others'); container.innerHTML = '';
+            otherHistory.forEach(txt => {
+                const pill = document.createElement('div'); pill.className = 'history-tag'; pill.innerText = txt;
+                pill.onclick = () => quickAdd(txt, true);
+                container.appendChild(pill);
+            });
+        }
+
+        function removeOrder(i) { let r = data[selS].orders.splice(i, 1)[0]; if (r === mealNameA) mA++; if (r === mealNameB) mB++; upInv(); render(); renderPanelOrders(); }
+        function setSeatStatus(s) { haptic(); data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); data[selS].orders = []; data[selS].status = s; upInv(); closePanel(); }
+        function setCarrier(c) { currC = c; document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase()))); closeSub(); render(); document.getElementById('side-indicator').style.backgroundColor = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)' }[c]; }
+        
+        function quickAdd(i, fromHistory = false) { 
+            haptic();
+            if (i === "Other") { 
+                let c = prompt("Enter request:"); 
+                if (c) {
+                    addOrder(c);
+                    if (!otherHistory.includes(c)) {
+                        otherHistory.unshift(c);
+                        if (otherHistory.length > 4) otherHistory.pop();
+                        saveState(); renderOthers();
+                    }
+                } 
+            } else addOrder(i); 
+        }
+        
+        function openHot(t) { currentHotDrink = t; cQ = {c:0, sg:0, sw:0}; upC(); document.getElementById('hot-title').innerText = t + " Prep"; document.getElementById('hot-plain-btn').innerText = (t === 'Coffee') ? 'BLACK' : 'PLAIN'; document.getElementById('mod-coffee').classList.add('active'); }
+        function adj(t, d) { cQ[t] = Math.max(0, Math.min(5, cQ[t]+d)); upC(); }
+        function upC() { document.getElementById('v-c').innerText = cQ.c; document.getElementById('v-sg').innerText = cQ.sg; document.getElementById('v-sw').innerText = cQ.sw; }
+        
+        function saveHotDrink(p) { 
+            let l = currentHotDrink === 'Coffee' ? (currC === 'DL' ? 'Starbucks' : (currC === 'UA' ? 'illy' : 'Coffee')) : currentHotDrink; 
+            if (p) { addOrder(l + ((currentHotDrink === 'Coffee') ? " (Black)" : " (Plain)")); } 
+            else { let opts = []; if(cQ.c) opts.push(cQ.c+' Cr'); if(cQ.sg) opts.push(cQ.sg+' Sug'); if(cQ.sw) opts.push(cQ.sw+' Swt'); addOrder(opts.length ? `${l} (${opts.join('/')})` : l); } 
+            closeMod(); 
+        }
+
+        function openSub(cat, title) { 
+            document.getElementById('view-main').style.display = 'none'; document.getElementById('view-sub').style.display = 'block'; document.getElementById('sub-title').innerText = title; 
+            const c = document.getElementById('sub-items'); c.innerHTML = ''; 
+            if (cat === 'alc') { 
+                const d = menus[currC].alc; ['beer', 'wine', 'sparkling', 'liquor'].forEach(s => { 
+                    if (d[s]?.length) { 
+                        let l = document.createElement('div'); l.style.cssText = "font-size:10px; color:#888; margin:10px 0 5px 0; letter-spacing:1px; width:100%; grid-column: span 2; text-transform: uppercase;"; l.innerText = s; c.appendChild(l); 
+                        d[s].forEach(item => { const b = document.createElement('button'); b.className = 'menu-item'; b.innerText = item; b.onclick = () => s === 'wine' ? addOrder(item) : openGen(item, s); c.appendChild(b); }); 
+                    } 
+                }); 
+            } else { menus[currC][cat].forEach(i => { const b = document.createElement('button'); b.className = 'menu-item'; b.innerText = i; b.onclick = () => cat === 'tea' ? (closeSub(), openHot(i)) : openGen(i, 'soft'); c.appendChild(b); }); } 
+        }
+
+        function closeSub() { document.getElementById('view-sub').style.display = 'none'; document.getElementById('view-main').style.display = 'block'; }
+        
+        function openGen(i, t) {
+            pItem = i; const g = document.getElementById('gen-options'); g.innerHTML = ''; document.getElementById('gen-title').innerText = i;
+            if (t === 'liquor') { const dblBtn = document.createElement('button'); dblBtn.className = 'menu-item'; dblBtn.style.cssText = 'background:#8e44ad; width:100%; flex: 0 0 100%; margin-bottom: 6px;'; dblBtn.innerText = 'Make it a Double (x2)'; dblBtn.onclick = () => { pItem += " x2"; document.getElementById('gen-title').innerText = pItem; dblBtn.style.display = 'none'; }; g.appendChild(dblBtn); }
+            mods[t].forEach(m => { const b = document.createElement('button'); b.className = 'menu-item'; b.innerText = m; b.onclick = () => { if (m === 'Mixer') { pendingMixer = pItem; closeMod(); closeSub(); document.getElementById('p-title').innerText = `Select Mixer for ${pItem}`; document.getElementById('p-title').style.color = 'var(--modifier)'; } else if (m === 'Solo' || m === 'Neat') { addOrder(pItem); closeMod(); closeSub(); } else { addOrder(`${pItem} (${m})`); closeMod(); closeSub(); } }; g.appendChild(b); });
+            const cBtn = document.createElement('button'); cBtn.className = 'menu-item'; cBtn.style.background = '#c0392b'; cBtn.innerText = 'Cancel'; cBtn.onclick = () => { pendingMixer = null; closeMod(); }; g.appendChild(cBtn);
+            document.getElementById('mod-gen').classList.add('active');
+        }
+
+        function addOrder(i) { haptic(); data[selS].status = null; if (pendingMixer) { data[selS].orders.push(`${pendingMixer} & ${i}`); pendingMixer = null; document.getElementById('p-title').innerText = `Seat ${selS}`; document.getElementById('p-title').style.color = ''; } else { data[selS].orders.push(i); } render(); renderPanelOrders(); }
+        function addMeal(type) { if (type === 'A' && mA > 0) { mA--; addOrder(mealNameA); } else if (type === 'B' && mB > 0) { mB--; addOrder(mealNameB); } upInv(); }
+        function upInv() { document.getElementById('cA').innerText = mA; document.getElementById('cB').innerText = mB; if(document.getElementById('bA')) { document.getElementById('bA').innerText = mealNameA; document.getElementById('bA').disabled = mA <= 0; } if(document.getElementById('bB')) { document.getElementById('bB').innerText = mealNameB; document.getElementById('bB').disabled = mB <= 0; } saveState(); }
+        function togMeal() { let en = document.getElementById('mTog').checked; document.getElementById('inv-bar').style.display = en ? 'flex' : 'none'; document.getElementById('m-ui').style.display = en ? 'block' : 'none'; upInv(); }
+        function setInv() { let nA = prompt("Name Option A?", mealNameA) || mealNameA; let cA = prompt(`How many ${nA}s?`, mA); let nB = prompt("Name Option B?", mealNameB) || mealNameB; let cB = prompt(`How many ${nB}s?`, mB); mealNameA = nA; if(cA !== null && !isNaN(cA)) mA = parseInt(cA); mealNameB = nB; if(cB !== null && !isNaN(cB)) mB = parseInt(cB); document.getElementById('lblA').innerText = mealNameA + ": "; document.getElementById('lblB').innerText = mealNameB + ": "; upInv(); }
+        function closeMod() { document.querySelectorAll('.mod-panel').forEach(p=>p.classList.remove('active')); document.getElementById('overlay').style.display = 'none'; }
+        function closePanel() { pendingMixer = null; document.getElementById('p-title').style.color = ''; data[selS].name = document.getElementById('p-name').value; document.getElementById('order-panel').classList.remove('open'); document.getElementById('overlay').style.display = 'none'; closeMod(); render(); }
+        function clearSeat() { data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); data[selS].orders = []; data[selS].status = null; upInv(); render(); renderPanelOrders(); }
+        function resetAll() { if(confirm("Clear all names, orders, and reset meals?")) { data = {}; mA = 7; mB = 5; mealNameA = "Meal A"; mealNameB = "Meal B"; render(); upInv(); } }
+        function togRev() { isReversed = !isReversed; render(); }
+        function toggleFont() { document.body.classList.toggle('large-font'); saveState(); }
+        
+        window.onload = function() {
+            loadState();      // 1. Pull data from phone memory
+            setCarrier(currC); // 2. Set colors (AA/DL/UA) based on that memory
+            upInv();          // 3. Update meal counts
+            render();         // 4. Finally, draw the cabin map
+        };
+    </script>
+</body>
+</html>
