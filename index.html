@@ -186,7 +186,7 @@
             margin-bottom: 4px;
         }
 
-        /* Contribute Section specific */
+        /* Contribute & Dropdown specific */
         .contribute-section {
             max-width: 800px;
             margin: 20px auto 40px auto;
@@ -254,6 +254,12 @@
             <h2 class="tool-title">Briefing Notes</h2>
             <p class="tool-desc">Quick-reference digital notepad for pre-flight crew briefings, flight facts, and specials.</p>
         </a>
+
+        <a href="tdp/index.html" class="tool-card">
+            <div class="icon">⏱️</div>
+            <h2 class="tool-title">TDP Tracker</h2>
+            <p class="tool-desc">DOT Tarmac Delay compliance timer. Log your water/snack services and auto-generate CYA emails for your records.</p>
+        </a>
     </div>
 
     <div style="text-align: center; width: 100%; margin: 40px 0 15px 0;">
@@ -277,52 +283,57 @@
     </div>
     
     <div class="changelog-section">
-        <h2 class="changelog-header"><span>📝</span> Dev Log & Updates</h2>
+        <h2 class="changelog-header" onclick="toggleLog()" style="cursor: pointer; border-bottom-color: rgba(255,255,255,0.1);">
+            <div style="display: flex; align-items: center; gap: 10px;"><span>📝</span> Dev Log & Updates</div>
+            <div id="dev-log-arrow" class="log-arrow" style="transform: rotate(180deg); color: var(--accent);">⏷</div>
+        </h2>
         
-        <div class="dev-log-entry">
-            
-            <div class="log-entry">
-                <div class="log-date">May 7, 2026</div>
-                <h3 class="log-title">SkyServe V1.23: Dynamic Layouts & Native APK</h3>
-                <div class="log-notes">
-                    Pushed SkyServe out of the experimental phase. Re-engineered the UI to support multiple aircraft types and finalized the Android wrapper.
-                    <ul>
-                        <li><strong>SkyServe (Dynamic Cabins):</strong> Added a global Layout toggle. Crews can now instantly switch between Regional (1x2) and Mainline (2x2) grids, scaling up to 10 rows deep.</li>
-                        <li><strong>SkyServe (State Persistence):</strong> Changing grid layouts dynamically re-maps the cabin without deleting passenger data or orders in memory.</li>
-                        <li><strong>SkyServe (UI Polish):</strong> Added tactile haptic feedback for Android users, pinned the "Save" panel to the footer, generated a visual center aisle for faster row scanning, and implemented a "smart memory" feature that saves recent custom text entries.</li>
-                        <li><strong>Global (Native Android Build):</strong> Packaged the PWA architecture into a standalone `.apk` using PWABuilder. Android users can now bypass Chrome restrictions and side-load GalleyOS directly as a native application.</li>
-                        <li><strong>Global (Help Modules):</strong> Integrated context-specific FAQ modals into Restock, TDP, and SkyServe to explain gesture interactions and logic flows.</li>
-                    </ul>
+        <div id="dev-log-content" class="log-content-wrapper" style="display: block;">
+            <div class="dev-log-entry">
+                
+                <div class="log-entry">
+                    <div class="log-date">May 7, 2026</div>
+                    <h3 class="log-title">SkyServe V1.23: Dynamic Layouts & Native APK</h3>
+                    <div class="log-notes">
+                        Pushed SkyServe out of the experimental phase. Re-engineered the UI to support multiple aircraft types and finalized the Android wrapper.
+                        <ul>
+                            <li><strong>SkyServe (Dynamic Cabins):</strong> Added a global Layout toggle. Crews can now instantly switch between Regional (1x2) and Mainline (2x2) grids, scaling up to 10 rows deep.</li>
+                            <li><strong>SkyServe (State Persistence):</strong> Changing grid layouts dynamically re-maps the cabin without deleting passenger data or orders in memory.</li>
+                            <li><strong>SkyServe (UI Polish):</strong> Added tactile haptic feedback for Android users, pinned the "Save" panel to the footer, generated a visual center aisle for faster row scanning, and implemented a "smart memory" feature that saves recent custom text entries.</li>
+                            <li><strong>Global (Native Android Build):</strong> Packaged the PWA architecture into a standalone `.apk` using PWABuilder. Android users can now bypass Chrome restrictions and side-load GalleyOS directly as a native application.</li>
+                            <li><strong>Global (Help Modules):</strong> Integrated context-specific FAQ modals into Restock, TDP, and SkyServe to explain gesture interactions and logic flows.</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="log-entry">
-                <div class="log-date">May 3, 2026</div>
-                <h3 class="log-title">GalleyOS V1.10: Native App & Offline Architecture</h3>
-                <div class="log-notes">
-                    Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.
-                    <ul>
-                        <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
-                        <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
-                        <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
-                    </ul>
+                <div class="log-entry">
+                    <div class="log-date">May 3, 2026</div>
+                    <h3 class="log-title">GalleyOS V1.10: Native App & Offline Architecture</h3>
+                    <div class="log-notes">
+                        Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.
+                        <ul>
+                            <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
+                            <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
+                            <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
 
-            <div class="log-entry">
-                <div class="log-date">April 26, 2026</div>
-                <h3 class="log-title">SkyServe V1.05: Ironclad Memory & Accessibility</h3>
-                <div class="log-notes">
-                    Focused on bulletproofing the app for the line trial and implementing the first round of crew feedback. 
-                    <ul>
-                        <li><strong>SkyServe (The Memory Bank):</strong> Built a local-storage auto-save. If your phone dies, the browser refreshes, or you switch apps, your entire cabin map and meal inventory is instantly restored exactly how you left it.</li>
-                        <li><strong>SkyServe (Accessibility):</strong> Added a master "A+" toggle in the header that scales up order text for tired eyes in a dark cabin.</li>
-                        <li><strong>SkyServe (UI Polish):</strong> Softened the visual friction for skipped seats. Added "💤 Sleeping" and "✅ All Good" quick-action statuses to track the cabin without needing to type.</li>
-                        <li><strong>Global:</strong> Opened the feedback loop by adding the GalleyOS email directly to the FAQ module.</li>
-                    </ul>
+                <div class="log-entry">
+                    <div class="log-date">April 26, 2026</div>
+                    <h3 class="log-title">SkyServe V1.05: Ironclad Memory & Accessibility</h3>
+                    <div class="log-notes">
+                        Focused on bulletproofing the app for the line trial and implementing the first round of crew feedback. 
+                        <ul>
+                            <li><strong>SkyServe (The Memory Bank):</strong> Built a local-storage auto-save. If your phone dies, the browser refreshes, or you switch apps, your entire cabin map and meal inventory is instantly restored exactly how you left it.</li>
+                            <li><strong>SkyServe (Accessibility):</strong> Added a master "A+" toggle in the header that scales up order text for tired eyes in a dark cabin.</li>
+                            <li><strong>SkyServe (UI Polish):</strong> Softened the visual friction for skipped seats. Added "💤 Sleeping" and "✅ All Good" quick-action statuses to track the cabin without needing to type.</li>
+                            <li><strong>Global:</strong> Opened the feedback loop by adding the GalleyOS email directly to the FAQ module.</li>
+                        </ul>
+                    </div>
                 </div>
+                
             </div>
-            
         </div>
     </div>
     
@@ -392,6 +403,20 @@
         function closeInstallGuide() {
             document.getElementById('install-overlay').style.display = 'none';
             document.getElementById('install-modal').style.display = 'none';
+        }
+        
+        function toggleLog() {
+            const content = document.getElementById('dev-log-content');
+            const arrow = document.getElementById('dev-log-arrow');
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.color = 'var(--accent)';
+            } else {
+                content.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.color = 'var(--text-muted)';
+            }
         }
         
         function toggleContribute() {
