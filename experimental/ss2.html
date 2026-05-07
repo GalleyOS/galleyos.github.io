@@ -9,7 +9,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Experimental V1.20</title>
+    <title>SkyServe Experimental V1.21</title>
     <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
@@ -31,13 +31,12 @@
         
         .cabin { padding: 8px; max-width: 600px; width: 100%; margin: 0 auto; display: block; box-sizing: border-box; }
         .row { display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 12px; width: 100%; gap: 6px; }
-        .seat { flex: 1; min-width: 0; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; border: 1px solid #444; box-sizing: border-box; transition: 0.2s; }
+        .seat { flex: 1; min-width: 0; min-height: 115px; background: #2a2a2a; border-radius: 10px; display: flex; flex-direction: column; padding: 6px; border: 1px solid #444; box-sizing: border-box; transition: 0.2s; cursor: pointer; }
         .seat.has-order { border-color: var(--order-green); background: #1a241a; }
         .seat.status-sleep { background: #111; border-color: #555; opacity: 0.7; }
         .status-icon { font-size: clamp(24px, 8vw, 36px); text-align: center; margin-top: 15px; opacity: 0.8; }
         
-        /* Aisle Polish: Row Numbers */
-        .aisle { width: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #555; text-transform: uppercase; }
+        .aisle { width: 30px; flex-shrink: 0; }
         
         .seat-label { font-weight: bold; color: var(--accent); font-size: clamp(14px, 4.5vw, 20px); }
         .pax-name { font-size: clamp(10px, 3vw, 14px); color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -54,7 +53,7 @@
         .stepper-row { display: flex; align-items: center; justify-content: space-between; background: #34495e; margin-bottom: 6px; padding: 8px; border-radius: 8px; }
         .step-btn { background: #1e1e1e; color: white; border: 1px solid #555; width: 35px; height: 35px; border-radius: 50%; font-size: 20px; }
         .menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
-        .menu-item { flex: 0 0 48%; background: var(--btn-gray); padding: 14px 2px; border-radius: 8px; text-align: center; font-size: 11px; border: none; color: white; font-weight: bold; }
+        .menu-item { flex: 0 0 48%; background: var(--btn-gray); padding: 14px 2px; border-radius: 8px; text-align: center; font-size: 11px; border: none; color: white; font-weight: bold; cursor: pointer; }
         .menu-item.small { flex: 0 0 31%; }
         .menu-item:active { background: #555; }
         .folder-btn { background: #2980b9; } 
@@ -195,7 +194,6 @@
         let cQ = {c:0, sg:0, sw:0}, pItem = "";
         let currentHotDrink = "Coffee", pendingMixer = null, isReversed = false, cabinRows = 4, cabinPattern = '1x2';
         
-        // Load custom history
         let otherHistory = JSON.parse(localStorage.getItem('skyServeOthers')) || [];
 
         const menus = {
@@ -236,7 +234,9 @@
                 const row = document.createElement('div'); row.className = 'row';
                 seatLayout.forEach(p => {
                     if (p === 'aisle') { 
-                        row.innerHTML += `<div class="aisle">${r}</div>`; 
+                        const a = document.createElement('div');
+                        a.className = 'aisle';
+                        row.appendChild(a);
                     } else {
                         const id = r + p; if (!data[id]) data[id] = { name: '', orders: [], status: null };
                         const d = data[id]; let extra = d.status === 'sleep' ? 'status-sleep' : (d.orders.length ? 'has-order' : '');
@@ -334,10 +334,10 @@
         function toggleFont() { document.body.classList.toggle('large-font'); saveState(); }
         
         window.onload = function() {
-            loadState();      // 1. Pull data from phone memory
-            setCarrier(currC); // 2. Set colors (AA/DL/UA) based on that memory
-            upInv();          // 3. Update meal counts
-            render();         // 4. Finally, draw the cabin map
+            loadState();
+            setCarrier(currC);
+            upInv();
+            render();
         };
     </script>
 </body>
