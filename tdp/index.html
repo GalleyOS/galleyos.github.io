@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TDP Tracker V1.2</title>
+    <title>TDP Tracker V1.3</title>
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
@@ -55,11 +54,30 @@
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #111; padding: 15px; display: flex; justify-content: space-between; border-top: 1px solid #333; }
         .home-btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; width: 42px; height: 42px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: 800; text-decoration: none; position: relative; overflow: hidden; }
         .home-btn::after { content: '✈'; position: absolute; font-size: 14px; bottom: -3px; right: 2px; opacity: 0.3; transform: rotate(-45deg); }
+
+        /* FAQ Modal Class */
+        #mod-faq.active { visibility: visible !important; opacity: 1 !important; }
     </style>
 </head>
 <body>
 
-    <div class="header">TDP Tracker</div>
+    <div id="faq-overlay" style="position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; z-index: 90;" onclick="document.getElementById('mod-faq').classList.remove('active'); this.style.display='none';"></div>
+
+    <div id="mod-faq" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e1e1e; width: 90%; max-width: 340px; border-radius: 15px; padding: 20px; z-index: 110; visibility: hidden; opacity: 0; border: 2px solid #3498db; transition: 0.2s; max-height: 80vh; overflow-y: auto;">
+        <h3 style="color: #3498db; margin-top:0; text-align:center;">TDP FAQ</h3>
+        <div style="font-size: 13px; line-height: 1.5; margin-bottom: 15px; color: #ddd;">
+            <p><strong style="color:#2ecc71">⏱️ Start Time:</strong> Verify the exact legal start time with the flight deck. If the delay started 20 minutes ago, enter that time and the app will automatically catch the timer up.</p>
+            <p><strong style="color:#f39c12">⚠️ Warnings:</strong> The timer turns yellow at 90 mins (prep carts) and red at 120 mins (DOT limit).</p>
+            <p><strong style="color:#3498db">📝 Logging:</strong> Use the buttons to instantly timestamp DOT services. Type cabin conditions into the notes box.</p>
+            <p><strong style="color:#e74c3c">✉️ CYA Email:</strong> The email button bundles your entire timestamped log and notes into a draft for your personal or company records.</p>
+        </div>
+        <button onclick="document.getElementById('mod-faq').classList.remove('active'); document.getElementById('faq-overlay').style.display='none';" style="background: #3498db; padding: 12px; border-radius: 8px; border: none; font-weight: bold; width: 100%; color: white; cursor: pointer;">GOT IT</button>
+    </div>
+
+    <div class="header" style="display: flex; justify-content: center; align-items: center; position: relative;">
+        <span>TDP Tracker</span>
+        <button onclick="document.getElementById('mod-faq').classList.add('active'); document.getElementById('faq-overlay').style.display='block';" style="position: absolute; right: 15px; background:none; border:1px solid #111; color:#111; border-radius:50%; width:26px; height:26px; font-size:12px; font-weight:bold; cursor:pointer;">?</button>
+    </div>
 
     <div class="container">
         
