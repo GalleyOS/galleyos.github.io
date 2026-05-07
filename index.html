@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
   <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GalleyOS">
-
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#121212">
-<link rel="manifest" href="/manifest.json">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GalleyOS">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#121212">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GalleyOS - Toolkit</title>
     <style>
-      
       /* The GalleyOS Logo Icon */
         .logo-icon {
             width: 50px;
@@ -27,7 +23,7 @@
             align-items: center;
             font-size: 30px;
             font-weight: 800;
-            margin: 0 auto 15px auto; /* Centers the logo and adds space below it */
+            margin: 0 auto 15px auto;
             box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
             position: relative;
             overflow: hidden;
@@ -124,18 +120,6 @@
             margin: 0; 
         }
 
-        /* Coming Soon State */
-        .card-future { 
-            border-style: dashed; 
-            opacity: 0.5; 
-            cursor: default; 
-        }
-        .card-future:hover { 
-            transform: none; 
-            border-color: #333; 
-            box-shadow: none; 
-        }
-
         /* Changelog Section */
         .changelog-section {
             max-width: 800px;
@@ -202,6 +186,18 @@
             margin-bottom: 4px;
         }
 
+        /* Contribute Section specific */
+        .contribute-section {
+            max-width: 800px;
+            margin: 20px auto 40px auto;
+            background: #1a2a3a;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #3498db;
+        }
+        .log-content-wrapper { transition: 0.3s ease; }
+        .log-arrow { font-size: 14px; transition: transform 0.3s; margin-left: auto; color: var(--text-muted); }
+
         /* Footer Signature */
         footer { 
             text-align: center; 
@@ -210,6 +206,25 @@
             font-size: 12px;
             line-height: 1.8;
         }
+        
+        .download-btn {
+            display: inline-block;
+            background: #2ecc71;
+            color: #111;
+            text-decoration: none;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .download-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -225,7 +240,7 @@
         <a href="skyserve/index.html" class="tool-card">
             <div class="icon">📱</div>
             <h2 class="tool-title">SkyServe</h2>
-            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently. Works for E170/175 and CRJ Regionals currently.</p>
+            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently. Works for 1x2 and 2x2 configurations.</p>
         </a>
 
         <a href="restock/index.html" class="tool-card">
@@ -237,15 +252,17 @@
         <a href="briefing/index.html" class="tool-card">
             <div class="icon">📖</div>
             <h2 class="tool-title">Briefing Notes</h2>
-            <p class="tool-desc">Quick-reference digital notepad for pre-flight crew briefings, flight facts, and specials. BETA. Changing soon to new app. </p>
+            <p class="tool-desc">Quick-reference digital notepad for pre-flight crew briefings, flight facts, and specials.</p>
         </a>
-<div style="text-align: center; width: 100%; margin: 15px 0;">
-    <button id="install-btn" style="display: none; background: #2ecc71; color: #111; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; width: 90%; max-width: 300px; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.3); cursor: pointer;">
-        ⬇️ INSTALL GALLEYOS TO PHONE
-    </button>
-</div>
+    </div>
 
-    <button onclick="openInstallGuide()" style="width: 100%; max-width: 360px; margin: 40px auto 15px auto; padding: 15px; background: #2c3e50; color: white; border: 2px dashed #3498db; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; display: block; transition: 0.2s;">📲 How to Save to Home Screen</button>
+    <div style="text-align: center; width: 100%; margin: 40px 0 15px 0;">
+        <a href="GalleyOS.apk" class="download-btn" download>
+            ⬇️ DOWNLOAD ANDROID APP
+        </a>
+    </div>
+
+    <button onclick="openInstallGuide()" style="width: 100%; max-width: 360px; margin: 15px auto 15px auto; padding: 15px; background: #2c3e50; color: white; border: 2px dashed #3498db; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; display: block; transition: 0.2s;">📲 How to Save to iPhone</button>
 
     <div class="changelog-section" style="margin-bottom: -40px;">
         <h2 class="changelog-header"><span>🎯</span> Project Ethos</h2>
@@ -258,68 +275,77 @@
             </p>
         </div>
     </div>
+    
     <div class="changelog-section">
         <h2 class="changelog-header"><span>📝</span> Dev Log & Updates</h2>
         
-      <div class="dev-log-entry">
-  
-<div class="log-entry">
-    <div class="log-date">May 3, 2026</div>
-    <h3 class="log-title">GalleyOS V1.10: Native App & Offline Architecture</h3>
-    <div class="log-notes">
-        Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.
-        <ul>
-            <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
-            <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
-            <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
-            <li><strong>iOS Optimization:</strong> Hardcoded Apple-specific &lt;meta&gt; tags and Touch Icons to force Safari to respect the full-screen, native-app environment when added to the home screen.</li>
-            <li><strong>Android Optimization:</strong> Calibrated the architecture to support WebAPK minting and PWABuilder compatibility, ensuring smooth installation regardless of corporate device management or Chrome engagement score barriers.</li>
-        </ul>
+        <div class="dev-log-entry">
+            
+            <div class="log-entry">
+                <div class="log-date">May 7, 2026</div>
+                <h3 class="log-title">SkyServe V1.23: Dynamic Layouts & Native APK</h3>
+                <div class="log-notes">
+                    Pushed SkyServe out of the experimental phase. Re-engineered the UI to support multiple aircraft types and finalized the Android wrapper.
+                    <ul>
+                        <li><strong>SkyServe (Dynamic Cabins):</strong> Added a global Layout toggle. Crews can now instantly switch between Regional (1x2) and Mainline (2x2) grids, scaling up to 10 rows deep.</li>
+                        <li><strong>SkyServe (State Persistence):</strong> Changing grid layouts dynamically re-maps the cabin without deleting passenger data or orders in memory.</li>
+                        <li><strong>SkyServe (UI Polish):</strong> Added tactile haptic feedback for Android users, pinned the "Save" panel to the footer, generated a visual center aisle for faster row scanning, and implemented a "smart memory" feature that saves recent custom text entries.</li>
+                        <li><strong>Global (Native Android Build):</strong> Packaged the PWA architecture into a standalone `.apk` using PWABuilder. Android users can now bypass Chrome restrictions and side-load GalleyOS directly as a native application.</li>
+                        <li><strong>Global (Help Modules):</strong> Integrated context-specific FAQ modals into Restock, TDP, and SkyServe to explain gesture interactions and logic flows.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="log-entry">
+                <div class="log-date">May 3, 2026</div>
+                <h3 class="log-title">GalleyOS V1.10: Native App & Offline Architecture</h3>
+                <div class="log-notes">
+                    Transformed GalleyOS from a web-based tool into a fully installable, offline-capable Progressive Web App (PWA) built specifically to survive Airplane Mode.
+                    <ul>
+                        <li><strong>Global (Offline Engine):</strong> Built a custom Service Worker (sw.js) that automatically saves the Hub, SkyServe, Restock, and Briefing directly to the device's hard drive. The entire toolkit now functions flawlessly at 30,000 feet with zero internet connection.</li>
+                        <li><strong>Global (OTA Updates):</strong> Engineered a dynamic cache-clearing system. When new features are added, crew devices automatically detect the version bump and download the fresh code in the background the next time they connect to airport Wi-Fi.</li>
+                        <li><strong>Global (Native Installation):</strong> Implemented a complete manifest.json with maskable icons and standalone display modes, stripping away the URL bar to give the toolkit the exact look and feel of a native Android/iOS app.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="log-entry">
+                <div class="log-date">April 26, 2026</div>
+                <h3 class="log-title">SkyServe V1.05: Ironclad Memory & Accessibility</h3>
+                <div class="log-notes">
+                    Focused on bulletproofing the app for the line trial and implementing the first round of crew feedback. 
+                    <ul>
+                        <li><strong>SkyServe (The Memory Bank):</strong> Built a local-storage auto-save. If your phone dies, the browser refreshes, or you switch apps, your entire cabin map and meal inventory is instantly restored exactly how you left it.</li>
+                        <li><strong>SkyServe (Accessibility):</strong> Added a master "A+" toggle in the header that scales up order text for tired eyes in a dark cabin.</li>
+                        <li><strong>SkyServe (UI Polish):</strong> Softened the visual friction for skipped seats. Added "💤 Sleeping" and "✅ All Good" quick-action statuses to track the cabin without needing to type.</li>
+                        <li><strong>Global:</strong> Opened the feedback loop by adding the GalleyOS email directly to the FAQ module.</li>
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
     </div>
-</div>
-
-      
-      <div class="log-entry">
-            <div class="log-date">April 26, 2026</div>
-            <h3 class="log-title">SkyServe V1.05: Ironclad Memory & Accessibility</h3>
-            <div class="log-notes">
-                Focused on bulletproofing the app for the line trial and implementing the first round of crew feedback. 
-                <ul>
-                    <li><strong>SkyServe (The Memory Bank):</strong> Built a local-storage auto-save. If your phone dies, the browser refreshes, or you switch apps, your entire cabin map and meal inventory is instantly restored exactly how you left it.</li>
-                    <li><strong>SkyServe (Accessibility):</strong> Added a master "A+" toggle in the header that scales up order text for tired eyes in a dark cabin.</li>
-                    <li><strong>SkyServe (UI Polish):</strong> Softened the visual friction for skipped seats. Added "💤 Sleeping" and "✅ All Good" quick-action statuses to track the cabin without needing to type.</li>
-                    <li><strong>Global:</strong> Opened the feedback loop by adding the GalleyOS email directly to the FAQ module.</li>
-                </ul>
-            </div>
-        </div>
-        <div class="log-entry">
-            <div class="log-date">April 23, 2026</div>
-            <h3 class="log-title">SkyServe V1.02 & Global UI Sync</h3>
-            <div class="log-notes">
-                Added several highly requested workflow improvements to SkyServe to eliminate tap friction. Unified the navigation across all apps.
-                <ul>
-                    <li><strong>SkyServe:</strong> Added the "Make it a Double" modifier for liquors.</li>
-                    <li><strong>SkyServe:</strong> Added individual item deletion ("X") inside the seat panel.</li>
-                    <li><strong>SkyServe:</strong> Juices now prompt for ice options.</li>
-                    <li><strong>Global:</strong> Implemented the unified "G" home button across Briefing, Restock, and SkyServe to allow seamless jumping back to the Hub.</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="log-entry">
-            <div class="log-date">April 22, 2026</div>
-            <h3 class="log-title">Briefing V2 & Restock Expansion</h3>
-            <div class="log-notes">
-                Stripped out the busywork from the Briefing app. Began the architectural overhaul of Restock to support partner airlines.
-                <ul>
-                    <li><strong>Briefing:</strong> Removed the manual verification checkboxes.</li>
-                    <li><strong>Briefing:</strong> Added multi-select timing buttons for turbulence (Take Off, Ascent, Cruise, Descent).</li>
-                    <li><strong>Restock:</strong> Built the new data-driven blueprint system.</li>
-                    <li><strong>Restock:</strong> Added UI toggles and dynamic color themes for American, Delta, and United profiles.</li>
-                </ul>
-            </div>
-        </div>
+    
+    <div class="contribute-section">
+        <h2 class="changelog-header" onclick="toggleContribute()" style="border-bottom-color: rgba(52, 152, 219, 0.3); cursor: pointer;">
+            <div style="display: flex; align-items: center; gap: 10px;"><span>🤝</span> How to Contribute</div>
+            <div id="con-arrow" class="log-arrow">⏷</div>
+        </h2>
         
+        <div id="con-content" class="log-content-wrapper" style="display: none;">
+            <div class="log-notes" style="color: #eee;">
+                <p>GalleyOS is 100% open source. If you're a crew member who codes (or wants to learn), I'd love your help making this better for everyone.</p>
+                <ul>
+                    <li><strong>Fleet Expansion:</strong> Help us map out seat grids for the 737 Max or A321.</li>
+                    <li><strong>Bug Hunting:</strong> Found a layout glitch or a typo in the menus? Let me know.</li>
+                    <li><strong>Feature Ideas:</strong> If there's a tool that would make your life easier in the galley, I'm all ears.</li>
+                </ul>
+                <p style="margin-top: 20px;">
+                    <strong>Get the Code:</strong> You can clone the repo from GitHub and submit a Pull Request, or just email your ideas/code snippets to 
+                    <a href="mailto:GalleyOS@proton.me" style="color: var(--accent); text-decoration: none; font-weight: bold;">GalleyOS@proton.me</a>.
+                </p>
+            </div>
+        </div>
     </div>
 
     <footer>
@@ -333,25 +359,25 @@
     <div id="install-modal" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e1e1e; width: 90%; max-width: 340px; border-radius: 15px; padding: 20px; z-index: 110; display: none; border: 2px solid #3498db; box-sizing: border-box;">
         
         <h3 style="color: #3498db; margin-top:0; text-align:center; font-size: 20px;">Make it an App!</h3>
-        <p style="text-align: center; color: #aaa; font-size: 13px; margin-bottom: 20px;">Save GalleyOS directly to your home screen so it works just like a native app.</p>
+        <p style="text-align: center; color: #aaa; font-size: 13px; margin-bottom: 20px;">Save GalleyOS directly to your phone so it works just like a native app.</p>
         
         <div style="background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+            <h4 style="margin: 0 0 10px 0; color: #ffffff;">🤖 Android (Best Method)</h4>
+            <ol style="color: #ddd; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.6;">
+                <li>Tap the green <strong>Download Android App</strong> button on the home page.</li>
+                <li>Your phone will download a file named <strong>GalleyOS.apk</strong>. Open it.</li>
+                <li>If your phone asks for permission to "Install Unknown Apps," allow it.</li>
+                <li>Tap <strong>Install</strong>.</li>
+            </ol>
+        </div>
+
+        <div style="background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
             <h4 style="margin: 0 0 10px 0; color: #ffffff;">🍏 iPhone (Company Device)</h4>
             <ol style="color: #ddd; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.6;">
                 <li>Open this page in <strong>Safari</strong>.</li>
                 <li>Tap the <strong>Share</strong> button at the bottom (the square with the arrow pointing up 📤).</li>
                 <li>Scroll down and tap <strong>Add to Home Screen</strong> (the plus icon ➕).</li>
                 <li>Tap <strong>Add</strong> in the top right corner.</li>
-            </ol>
-        </div>
-
-        <div style="background: #2a2a2a; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-            <h4 style="margin: 0 0 10px 0; color: #ffffff;">🤖 Android</h4>
-            <ol style="color: #ddd; font-size: 14px; margin: 0; padding-left: 20px; line-height: 1.6;">
-                <li>Open this page in <strong>Chrome</strong>.</li>
-                <li>Tap the <strong>Menu</strong> icon (the three dots ⋮ in the top right).</li>
-                <li>Tap <strong>Add to Home screen</strong>.</li>
-                <li>Tap <strong>Install</strong> or <strong>Add</strong>.</li>
             </ol>
         </div>
 
@@ -367,44 +393,22 @@
             document.getElementById('install-overlay').style.display = 'none';
             document.getElementById('install-modal').style.display = 'none';
         }
+        
+        function toggleContribute() {
+            const content = document.getElementById('con-content');
+            const arrow = document.getElementById('con-arrow');
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.color = 'var(--accent)';
+            } else {
+                content.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+                arrow.style.color = 'var(--text-muted)';
+            }
+        }
     </script>
 
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById('install-btn');
-
-  // Listen for the secret Chrome install signal
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent Chrome from showing its own unpredictable mini-bar
-    e.preventDefault();
-    // Stash the event so it can be triggered later.
-    deferredPrompt = e;
-    // Show our custom button
-    installBtn.style.display = 'block';
-  });
-
-  // What happens when the user clicks our button
-  installBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      // Show the official Android install prompt
-      deferredPrompt.prompt();
-      // Wait for the user to respond to the prompt
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
-      // We've used the prompt, and can't use it again, throw it away
-      deferredPrompt = null;
-      // Hide the button since they installed it
-      installBtn.style.display = 'none';
-    }
-  });
-
-  // Hide the button if they successfully install it via the menu instead
-  window.addEventListener('appinstalled', () => {
-    installBtn.style.display = 'none';
-    console.log('GalleyOS was successfully installed');
-  });
-</script>
-  
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -413,8 +417,6 @@
         .catch(err => console.log('Service Worker Failed!', err));
     });
   }
-</script>
+  </script>
 </body>
-
-
 </html>
