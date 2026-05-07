@@ -118,8 +118,10 @@
 
     <div class="header">
         <a href="../index.html" class="home-btn">G</a>
+      
+      
         <div>
-            <strong>E175</strong>
+            <button id="fleet-btn" onclick="toggleFleet()" style="background:#333; border:1px solid #555; color:white; border-radius:6px; padding:4px 8px; font-weight:bold; font-size:14px; transition:0.2s;">B737 ⏷</button>
             <button onclick="toggleFont()" id="font-btn" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s;">A+</button>
             <button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:12px; margin-left:4px; vertical-align: middle;">?</button>
         </div>
@@ -198,7 +200,13 @@
         let currentHotDrink = "Coffee"; 
         let pendingMixer = null;
         let isReversed = false; 
-        
+        let currentFleet = 'B737'; // Default to the new 2x2 layout
+
+        function toggleFleet() {
+            currentFleet = currentFleet === 'E175' ? 'B737' : 'E175';
+            document.getElementById('fleet-btn').innerText = currentFleet + ' ⏷';
+            render(); // Instantly redraw the cabin!
+        }
         const menus = {
             AA: { 
                 soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"],
@@ -296,11 +304,21 @@
             if(!container) return;
             container.innerHTML = '';
             
+            // The Blueprint Matrix
             let rowNums = [1, 2, 3, 4]; 
-            if (isReversed) rowNums.reverse();
+            let seatLayout = [];
 
-            let seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F'];
-            if (isReversed) seatLayout.reverse();
+            if (currentFleet === 'E175') {
+                seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F'];
+            } else if (currentFleet === 'B737') {
+                // The new 2x2 layout!
+                seatLayout = ['A', 'B', 'aisle', 'E', 'F'];
+            }
+
+            if (isReversed) {
+                rowNums.reverse();
+                seatLayout.reverse();
+            }
 
             rowNums.forEach(r => {
                 const row = document.createElement('div'); 
