@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="GalleyOS">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GalleyOS">
 
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#121212">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#121212">
 
-  <link rel="manifest" href="/manifest.json">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Release V1.05</title>
+    <title>SkyServe Experimental</title>
     <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
@@ -38,6 +37,7 @@
         
         .global-controls { display: flex; justify-content: center; align-items: center; gap: 10px; background: #252525; padding: 8px; font-size: 11px; }
 
+        /* Dynamic Grid CSS */
         .cabin { padding: 8px; max-width: 600px; width: 100%; margin: 0 auto; display: block; box-sizing: border-box; }
         .row { display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 12px; width: 100%; gap: 6px; }
         
@@ -74,7 +74,7 @@
         .close-btn { background: var(--order-green); padding: 16px; border-radius: 12px; border: none; font-weight: bold; width: 100%; margin-top: 15px; color: black; }
         .back-btn { background: #555; padding: 12px; border-radius: 8px; border: none; font-weight: bold; width: 100%; margin-bottom: 10px; color: white; }
 
-       /* --- LARGE FONT MODE --- */
+        /* --- LARGE FONT MODE --- */
         body.large-font .order-display { 
             font-size: clamp(14px, 5vw, 22px); 
             margin-top: 6px; 
@@ -100,6 +100,29 @@
         </div>
         <button class="close-btn" onclick="closeMod()">GOT IT</button>
     </div>
+
+    <div id="mod-layout" class="mod-panel">
+        <h3 style="text-align:center; color: var(--accent); margin-top:0;">Cabin Layout</h3>
+        
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Number of Rows</div>
+        <div class="stepper-row" style="margin-bottom: 15px;">
+            <span>FC Rows</span>
+            <div>
+                <button class="step-btn" onclick="adjRows(-1)">-</button>
+                <span id="v-rows" style="margin:0 15px; font-weight:bold; color:var(--accent); font-size: 18px;">4</span>
+                <button class="step-btn" onclick="adjRows(1)">+</button>
+            </div>
+        </div>
+
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Seat Pattern</div>
+        <div class="menu-grid" style="margin-bottom: 15px;">
+            <button id="pat-1x2" class="menu-item" onclick="setPattern('1x2')">1 x 2</button>
+            <button id="pat-2x2" class="menu-item" onclick="setPattern('2x2')">2 x 2</button>
+            <button id="pat-2x1" class="menu-item" onclick="setPattern('2x1')">2 x 1</button>
+        </div>
+
+        <button class="close-btn" style="background:var(--order-green); color:black;" onclick="applyLayout()">APPLY & REDRAW</button>
+    </div>
   
     <div id="mod-coffee" class="mod-panel">
         <h3 id="hot-title" style="text-align:center; color: var(--modifier); margin-top:0;">Prep</h3>
@@ -118,10 +141,8 @@
 
     <div class="header">
         <a href="../index.html" class="home-btn">G</a>
-      
-      
         <div>
-            <button id="fleet-btn" onclick="toggleFleet()" style="background:#333; border:1px solid #555; color:white; border-radius:6px; padding:4px 8px; font-weight:bold; font-size:14px; transition:0.2s;">B737 ⏷</button>
+            <button onclick="openLayoutMod()" style="background:#333; border:1px solid #555; color:white; border-radius:6px; padding:6px 12px; font-weight:bold; font-size:12px; transition:0.2s;">LAYOUT ⏷</button>
             <button onclick="toggleFont()" id="font-btn" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s;">A+</button>
             <button onclick="document.getElementById('mod-info').classList.add('active')" style="background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:12px; margin-left:4px; vertical-align: middle;">?</button>
         </div>
@@ -194,19 +215,19 @@
     </div>
 
     <script>
+        // --- CORE VARIABLES ---
         let currC = 'AA', selS = null, data = {};
         let mA = 7, mB = 5, mealNameA = "Meal A", mealNameB = "Meal B";
         let cQ = {c:0, sg:0, sw:0}, pItem = "";
         let currentHotDrink = "Coffee"; 
         let pendingMixer = null;
         let isReversed = false; 
-        let currentFleet = 'B737'; // Default to the new 2x2 layout
-
-        function toggleFleet() {
-            currentFleet = currentFleet === 'E175' ? 'B737' : 'E175';
-            document.getElementById('fleet-btn').innerText = currentFleet + ' ⏷';
-            render(); // Instantly redraw the cabin!
-        }
+        
+        // --- NEW LAYOUT VARIABLES ---
+        let cabinRows = 4;
+        let cabinPattern = '1x2';
+        
+        // --- MENUS ---
         const menus = {
             AA: { 
                 soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"],
@@ -252,10 +273,11 @@
             liquor: ["Neat", "Ice", "Mixer"]
         };
 
-        // --- NEW: THE MEMORY BANK (LOCAL STORAGE) ---
+        // --- LOCAL STORAGE ---
         function saveState() {
             const state = {
                 currC, data, mA, mB, mealNameA, mealNameB, isReversed,
+                cabinRows, cabinPattern, // Save the new layout parameters!
                 largeFont: document.body.classList.contains('large-font')
             };
             localStorage.setItem('skyServeData', JSON.stringify(state));
@@ -273,6 +295,9 @@
                 mealNameB = state.mealNameB || "Meal B";
                 isReversed = state.isReversed || false;
                 
+                cabinRows = state.cabinRows || 4;
+                cabinPattern = state.cabinPattern || '1x2';
+                
                 if (state.largeFont) {
                     document.body.classList.add('large-font');
                     const btn = document.getElementById('font-btn');
@@ -282,8 +307,45 @@
                 }
             }
         }
-        // --------------------------------------------
 
+        // --- LAYOUT LOGIC ---
+        function openLayoutMod() {
+            document.getElementById('v-rows').innerText = cabinRows;
+            updatePatternUI();
+            document.getElementById('mod-layout').classList.add('active');
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function adjRows(dir) {
+            cabinRows = Math.max(1, Math.min(10, cabinRows + dir)); 
+            document.getElementById('v-rows').innerText = cabinRows;
+        }
+
+        function setPattern(pat) {
+            cabinPattern = pat;
+            updatePatternUI();
+        }
+
+        function updatePatternUI() {
+            ['1x2', '2x2', '2x1'].forEach(p => {
+                const btn = document.getElementById('pat-' + p);
+                if (cabinPattern === p) {
+                    btn.style.background = 'var(--accent)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'var(--btn-gray)';
+                    btn.style.color = '#888';
+                }
+            });
+        }
+
+        function applyLayout() {
+            closeMod();
+            document.getElementById('overlay').style.display = 'none';
+            render();
+        }
+
+        // --- UI TOGGLES ---
         function toggleFont() {
             document.body.classList.toggle('large-font');
             const btn = document.getElementById('font-btn');
@@ -296,23 +358,27 @@
                 btn.style.borderColor = "#888";
                 btn.style.background = "none";
             }
-            saveState(); // Save preference
+            saveState();
         }
 
+        function togRev() { isReversed = !isReversed; render(); }
+
+        // --- RENDERING CORE ---
         function render() {
             const container = document.getElementById('cabin-map');
             if(!container) return;
             container.innerHTML = '';
             
-            // The Blueprint Matrix
-            let rowNums = [1, 2, 3, 4]; 
+            // Dynamic Rows and Patterns
+            let rowNums = Array.from({length: cabinRows}, (_, i) => i + 1); 
             let seatLayout = [];
 
-            if (currentFleet === 'E175') {
+            if (cabinPattern === '1x2') {
                 seatLayout = (currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F'];
-            } else if (currentFleet === 'B737') {
-                // The new 2x2 layout!
+            } else if (cabinPattern === '2x2') {
                 seatLayout = ['A', 'B', 'aisle', 'E', 'F'];
+            } else if (cabinPattern === '2x1') {
+                seatLayout = ['A', 'B', 'aisle', 'C'];
             }
 
             if (isReversed) {
@@ -360,11 +426,10 @@
                 container.appendChild(row);
             });
             
-            saveState(); // Captures almost every change to the board
+            saveState(); 
         }
 
-        function togRev() { isReversed = !isReversed; render(); }
-
+        // --- ORDER MANAGEMENT ---
         function openP(id) {
             selS = id; if(!data[id]) data[id] = {name:'', orders:[], status: null};
             
@@ -576,7 +641,7 @@
                 document.getElementById('bB').innerText = mealNameB;
                 document.getElementById('bB').disabled = mB <= 0;
             }
-            saveState(); // Saves whenever meal counts change
+            saveState();
         }
 
         function togMeal() {
@@ -610,7 +675,7 @@
             document.getElementById('order-panel').classList.remove('open'); 
             document.getElementById('overlay').style.display = 'none'; 
             closeMod(); 
-            render(); // render() triggers the saveState to lock in the name
+            render(); 
         }
 
         function clearSeat() { 
@@ -629,18 +694,9 @@
 
         window.onload = function() {
             loadState();
-            setCarrier(currC); // Triggers the visual buttons to match loaded data
-            upInv(); // Ensures meal counts display correctly on load
+            setCarrier(currC); 
+            upInv(); 
         };
     </script>
-  <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('../sw.js')
-        .then(reg => console.log('Service Worker Registered!', reg))
-        .catch(err => console.log('Service Worker Failed!', err));
-    });
-  }
-</script>
 </body>
 </html>
