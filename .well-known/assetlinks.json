@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.galleyos.twa",
+        "sha256_cert_fingerprints": ["14:EA:9D:61:0A:BC:6F:D7:D1:9F:6A:C8:18:36:5A:CB:07:11:4C:04:B8:6D:7D:C1:E2:AE:40:FC:C8:97:8A:46"]
+      }
+    }]
