@@ -52,10 +52,11 @@
         .pax-name { font-size: clamp(10px, 3vw, 14px); color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .order-display { font-size: clamp(10px, 3.5vw, 15px); margin-top: 4px; line-height: 1.2; color: #ddd; transition: 0.2s; word-wrap: break-word; }
         
-        /* Panel Polish: Sticky Footer */
-        .panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; padding: 15px 15px 90px 15px; transform: translateY(100%); transition: 0.3s; z-index: 100; max-height: 85vh; overflow-y: auto; }
+        /* Flexbox Panel Polish */
+        .panel { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-radius: 20px 20px 0 0; transform: translateY(100%); transition: 0.3s; z-index: 100; max-height: 85vh; display: flex; flex-direction: column; }
         .panel.open { transform: translateY(0); }
-        .panel-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; gap: 5px; z-index: 101; }
+        .panel-scroll { padding: 15px; overflow-y: auto; flex: 1; }
+        .panel-footer { padding: 15px; background: var(--card); border-top: 1px solid #333; display: flex; flex-direction: column; gap: 5px; }
         
         .overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.85); display: none; z-index: 90; }
         .mod-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #1e1e1e; width: 90%; max-width: 320px; border-radius: 15px; padding: 15px; z-index: 110; visibility: hidden; opacity: 0; border: 2px solid var(--accent); transition: 0.2s; max-height: 80vh; overflow-y: auto; }
@@ -159,50 +160,52 @@
     <div class="cabin" id="cabin-map"></div>
 
     <div id="order-panel" class="panel">
-        <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
-        <input type="text" id="p-name" placeholder="Pax Name" style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
-        
-        <div id="current-orders-list" style="margin-bottom: 10px;"></div>
-        
-        <div id="m-ui" style="display:none;">
-            <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
-            <div class="menu-grid" style="margin-bottom: 15px;">
-                <button id="bA" class="menu-item small meal-btn" onclick="addMeal('A')">Meal A</button>
-                <button id="bB" class="menu-item small meal-btn" onclick="addMeal('B')">Meal B</button>
-                <button class="menu-item small meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
-            </div>
-        </div>
-        
-        <div style="display:flex; gap:10px; margin-bottom: 15px;">
-            <button onclick="setSeatStatus('sleep')" style="flex:1; padding:12px; border-radius:8px; border:1px solid #555; background:#111; color:white; font-weight:bold; cursor: pointer;">💤 Sleeping</button>
-            <button onclick="setSeatStatus('skip')" style="flex:1; padding:12px; border-radius:8px; border:none; background:#34495e; color:white; font-weight:bold; cursor: pointer;">✅ All Good</button>
-        </div>
-        
-        <div id="view-main">
-            <div style="font-size:10px; color:#888; margin:0 0 5px 0; letter-spacing: 1px;">DRINKS</div>
-            <div class="menu-grid">
-                <button class="menu-item small" onclick="openGen('Water', 'water')">Water</button>
-                <button class="menu-item small" onclick="openHot('Coffee')">Coffee</button>
-                <button class="menu-item small" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
-                
-                <button class="menu-item small direct-btn" onclick="quickAdd('Just Ice')">Just Ice</button>
-                <button class="menu-item small" onclick="quickAdd('Other')">Other ⌨️</button>
-                
-                <button class="menu-item small folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
-                <button class="menu-item small folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
-                <button class="menu-item small folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
-                <button class="menu-item small folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
+        <div class="panel-scroll">
+            <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
+            <input type="text" id="p-name" placeholder="Pax Name" style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+            
+            <div id="current-orders-list" style="margin-bottom: 10px;"></div>
+            
+            <div id="m-ui" style="display:none;">
+                <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
+                <div class="menu-grid" style="margin-bottom: 15px;">
+                    <button id="bA" class="menu-item small meal-btn" onclick="addMeal('A')">Meal A</button>
+                    <button id="bB" class="menu-item small meal-btn" onclick="addMeal('B')">Meal B</button>
+                    <button class="menu-item small meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
+                </div>
             </div>
             
-            <div id="recent-others" style="display:flex; gap:5px; margin-top:10px; overflow-x:auto; width:100%; padding-bottom:5px;"></div>
+            <div style="display:flex; gap:10px; margin-bottom: 15px;">
+                <button onclick="setSeatStatus('sleep')" style="flex:1; padding:12px; border-radius:8px; border:1px solid #555; background:#111; color:white; font-weight:bold; cursor: pointer;">💤 Sleeping</button>
+                <button onclick="setSeatStatus('skip')" style="flex:1; padding:12px; border-radius:8px; border:none; background:#34495e; color:white; font-weight:bold; cursor: pointer;">✅ All Good</button>
+            </div>
+            
+            <div id="view-main">
+                <div style="font-size:10px; color:#888; margin:0 0 5px 0; letter-spacing: 1px;">DRINKS</div>
+                <div class="menu-grid">
+                    <button class="menu-item small" onclick="openGen('Water', 'water')">Water</button>
+                    <button class="menu-item small" onclick="openHot('Coffee')">Coffee</button>
+                    <button class="menu-item small" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
+                    
+                    <button class="menu-item small direct-btn" onclick="quickAdd('Just Ice')">Just Ice</button>
+                    <button class="menu-item small" onclick="quickAdd('Other')">Other ⌨️</button>
+                    
+                    <button class="menu-item small folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
+                    <button class="menu-item small folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
+                    <button class="menu-item small folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
+                    <button class="menu-item small folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
+                </div>
+                
+                <div id="recent-others" style="display:flex; gap:5px; margin-top:10px; overflow-x:auto; width:100%; padding-bottom:5px;"></div>
+            </div>
+            
+            <div id="view-sub" style="display:none;">
+                <button class="back-btn" onclick="closeSub()">🔙 BACK</button>
+                <div style="font-size:12px; color:#aaa; margin:0 0 8px 0; font-weight:bold; text-transform: uppercase;" id="sub-title">Category</div>
+                <div class="menu-grid" id="sub-items"></div>
+            </div>
         </div>
-        
-        <div id="view-sub" style="display:none;">
-            <button class="back-btn" onclick="closeSub()">🔙 BACK</button>
-            <div style="font-size:12px; color:#aaa; margin:0 0 8px 0; font-weight:bold; text-transform: uppercase;" id="sub-title">Category</div>
-            <div class="menu-grid" id="sub-items"></div>
-        </div>
-        
+
         <div class="panel-footer">
             <button class="close-btn" onclick="closePanel()" style="margin-top:0;">SAVE & CLOSE</button>
             <button onclick="clearSeat()" style="width:100%; background:none; color:#ff4757; border:none; margin-top:5px; font-size:11px; cursor: pointer; font-weight: bold;">Clear Entire Seat</button>
