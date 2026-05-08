@@ -1,4 +1,4 @@
-const CACHE_NAME = 'galleyos-cache-v1.23';
+const CACHE_NAME = 'galleyos-cache-v1.24';
 
 // List all the files that the phone needs to save for offline use
 const urlsToCache = [
