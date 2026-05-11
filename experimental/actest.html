@@ -264,7 +264,7 @@
         function render() {
             const container = document.getElementById('cabin-map'); if(!container) return; container.innerHTML = '';
             let rowNums = Array.from({length: cabinRows}, (_, i) => i + 1); 
-            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA' || currC === 'AC') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
+            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA' ||) ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
             if (isReversed) { rowNums.reverse(); seatLayout.reverse(); }
             
             rowNums.forEach(r => {
