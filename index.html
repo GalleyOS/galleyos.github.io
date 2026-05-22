@@ -269,7 +269,7 @@
     </div>
 
     <button onclick="openInstallGuide()" style="width: 100%; max-width: 360px; margin: 15px auto 15px auto; padding: 15px; background: #2c3e50; color: white; border: 2px dashed #3498db; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; display: block; transition: 0.2s;">📲 How to Save to iPhone</button>
-
+<button onclick="shareApp()" style="width: 100%; max-width: 360px; margin: 0 auto 15px auto; padding: 15px; background: #8e44ad; color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; display: block; transition: 0.2s; box-shadow: 0 4px 10px rgba(142, 68, 173, 0.3);">📤 SHARE WITH CREW</button>
     <div class="changelog-section" style="margin-bottom: -40px;">
         <h2 class="changelog-header"><span>🎯</span> Project Ethos</h2>
         <div class="log-notes" style="font-size: 15px; line-height: 1.8;">
@@ -291,6 +291,20 @@
         <div id="dev-log-content" class="log-content-wrapper" style="display: block;">
             <div class="dev-log-entry">
                 
+                <!-- NEW UPDATE ENTRY ADDED HERE -->
+                <div class="log-entry">
+                    <div class="log-date">May 22, 2026</div>
+                    <h3 class="log-title">GalleyOS V1.25: Air Canada & Native Sharing</h3>
+                    <div class="log-notes">
+                        Expanded carrier support north of the border and made it easier to share the app on the line.
+                        <ul>
+                            <li><strong>SkyServe (Air Canada):</strong> Added AC to the carrier toggles! Features dynamic menu switching for "Soft Drinks" (like Montellier and Clamato), specific tea selections, rotating wines, and the correct A-D-F regional seating layout.</li>
+                            <li><strong>Global (Native Sharing):</strong> Integrated the Web Share API. Tapping "Share With Crew" now opens your phone's native share menu so you can instantly AirDrop or text the app link to your flying partners.</li>
+                            <li><strong>SkyServe (American):</strong> Refined the liquor menu to specifically track Woodford Reserve.</li>
+                        </ul>
+                    </div>
+                </div>
+
                 <div class="log-entry">
                     <div class="log-date">May 7, 2026</div>
                     <h3 class="log-title">SkyServe V1.23: Dynamic Layouts & Native APK</h3>
@@ -443,5 +457,25 @@
     });
   }
   </script>
+  <script>
+  async function shareApp() {
+    // 1. Check if the device supports the native share menu
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'GalleyOS Toolkit',
+          text: 'Check out this offline-ready app for the galley. It maps the cabin and saves meal counts even in Airplane Mode!',
+          url: 'https://galleyos.github.io/'
+        });
+        console.log('App shared successfully');
+      } catch (error) {
+        console.log('User canceled or error sharing:', error);
+      }
+    } else {
+      // 2. Fallback for older devices or desktop browsers
+      alert("Copy and text this link to your crew: https://galleyos.github.io/");
+    }
+  }
+</script>
 </body>
 </html>
