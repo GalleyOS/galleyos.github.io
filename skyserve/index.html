@@ -14,7 +14,7 @@
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
-            --accent: #3498db; --aa-red: #c3002f; --dl-blue: #003366; --ua-blue: #005daa;
+            --accent: #3498db; --aa-red: #c3002f; --dl-blue: #003366; --ua-blue: #005daa; --ac-red: #d82f2e;
             --order-green: #2ecc71; --btn-gray: #3a3a3a; --modifier: #f1c40f; --meal-orange: #d35400;
         }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; user-select: none; padding-bottom: 100px; }
@@ -27,7 +27,7 @@
         .carrier-toggles { display: flex; justify-content: center; gap: 8px; margin-top: 10px; }
         .carrier-btn { padding: 8px 12px; border-radius: 20px; border: none; font-weight: bold; font-size: 11px; opacity: 0.4; color: white; cursor: pointer; }
         .carrier-btn.active { opacity: 1; transform: scale(1.05); border: 1px solid white; }
-        .aa { background: var(--aa-red); } .dl { background: var(--dl-blue); } .ua { background: var(--ua-blue); }
+        .aa { background: var(--aa-red); } .dl { background: var(--dl-blue); } .ua { background: var(--ua-blue); } .ac { background: var(--ac-red); }
         
         /* Font Button CSS Fix */
         .font-btn { background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s; cursor: pointer; }
@@ -142,6 +142,7 @@
             <button class="carrier-btn aa active" onclick="setCarrier('AA')">AA</button>
             <button class="carrier-btn dl" onclick="setCarrier('DL')">DL</button>
             <button class="carrier-btn ua" onclick="setCarrier('UA')">UA</button>
+            <button class="carrier-btn ac" onclick="setCarrier('AC')">AC</button>
         </div>
     </div>
 
@@ -185,17 +186,16 @@
                 <div class="menu-grid">
                     <button class="menu-item small" onclick="openGen('Water', 'water')">Water</button>
                     <button class="menu-item small" onclick="openHot('Coffee')">Coffee</button>
-                    <button class="menu-item small" onclick="currC === 'UA' ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
+                    <button class="menu-item small" onclick="(currC === 'UA' || currC === 'AC') ? openSub('tea', '🍵 Teas') : openHot('Tea')">Tea</button>
                     
                     <button class="menu-item small direct-btn" onclick="quickAdd('Just Ice')">Just Ice</button>
                     <button class="menu-item small" onclick="quickAdd('Other')">Other ⌨️</button>
                     
-                    <button class="menu-item small folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
-                    <button class="menu-item small folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
-                    <button class="menu-item small folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
-                    <button class="menu-item small folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
+                    <button id="btn-soda" class="menu-item small folder-btn" onclick="openSub('soda', '🥤 Sodas')">Soda ➔</button>
+                    <button id="btn-juice" class="menu-item small folder-btn" onclick="openSub('juice', '🧃 Juices')">Juice ➔</button>
+                    <button id="btn-mixer" class="menu-item small folder-btn" onclick="openSub('mixers', '🍋 Mixers')">Mixers ➔</button>
+                    <button id="btn-alc" class="menu-item small folder-btn" onclick="openSub('alc', '🍷 Alcohol')">Alcohol ➔</button>
                 </div>
-                
                 <div id="recent-others" style="display:flex; gap:5px; margin-top:10px; overflow-x:auto; width:100%; padding-bottom:5px;"></div>
             </div>
             
@@ -221,10 +221,22 @@
         let otherHistory = JSON.parse(localStorage.getItem('skyServeOthers')) || [];
 
         const menus = {
-            AA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"], juice: ["Orange", "Apple", "Tomato", "Cranberry"], mixers: ["Club", "Lime LC","Berry LC","BMM", "Tonic", "Margarita Mix"], alc: { beer: ["Bud Light", "XX","IPA","Heineken", "Athletic"], wine: ["White Wine", "Red Wine"], sparkling: ["Prosecco"], liquor: ["Vodka", "Gin", "Rum","Baileys","Jack", "Tequila","Bourbon", "Scotch"] } },
+            AA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"], juice: ["Orange", "Apple", "Tomato", "Cranberry"], mixers: ["Club", "Lime LC","Berry LC","BMM", "Tonic", "Margarita Mix"], alc: { beer: ["Bud Light", "XX","IPA","Heineken", "Athletic"], wine: ["White Wine", "Red Wine"], sparkling: ["Prosecco"], liquor: ["Vodka", "Gin", "Rum","Baileys","Jack", "Tequila","Woodford", "Scotch"] } },
             DL: { soda: ["Coke", "Diet Coke", "Coke Zero", "Ginger Ale","Sprite"], juice: ["OJ", "Apple", "Cranberry"], mixers: ["Club","Tonic","BMM"], alc: { beer: ["Miller Lite","Sweetwater","Voodoo Ranger"], wine: ["White","Red"], sparkling: ["Sparkling"], liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace"] } },
-            UA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Ginger Ale"], juice: ["Lemonade", "OJ", "Apple", "Cranberry", "Tomato"], mixers: ["Seltzer", "Tonic","AHA Blueberry", "AHA Pineapple", "BMM"], tea: ["Lemon Ginger", "Green Tea", "Black Tea"], alc: { beer: ["Michelob Ultra", "Stella", "Bell's IPA"], wine: ["White","Red", "Rose"], sparkling: ["Sparkling"], liquor: ["Vodka", "Rum", "Gin","Tequila", "Bailey's", "Jack","Bourbon", "Scotch","Espresso Martini","Vodka Spritz"] } }
+            UA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Ginger Ale"], juice: ["Lemonade", "OJ", "Apple", "Cranberry", "Tomato"], mixers: ["Seltzer", "Tonic","AHA Blueberry", "AHA Pineapple", "BMM"], tea: ["Lemon Ginger", "Green Tea", "Black Tea"], alc: { beer: ["Michelob Ultra", "Stella", "Bell's IPA"], wine: ["White","Red", "Rose"], sparkling: ["Sparkling"], liquor: ["Vodka", "Rum", "Gin","Tequila", "Bailey's", "Jack","Bourbon", "Scotch","Espresso Martini","Vodka Spritz"] } },
+            AC: { 
+                soda: ["Pepsi", "Diet Pepsi", "Pepsi Zero", "7up", "Ginger ale", "Soda Water", "Tonic Water", "Montellier", "Milk"], 
+                juice: ["Apple", "Orange", "Cranberry", "Tomato", "Clamato"], 
+                tea: ["Tea", "Herbal Tea"], 
+                alc: { 
+                    beer: ["Canadian", "Coors Lite", "Creamore", "Hop Valley IPA", "Heineken 0.0"], 
+                    wine: ["White 1", "White 2", "Red 1", "Red 2"], 
+                    sparkling: ["Sparkling"], 
+                    liquor: ["Vodka", "Gin", "Scotch", "Rye", "Rum", "Spiced rum", "Tequila", "Campari", "Baileys", "Grand Marnier", "Cognac"] 
+                } 
+            }
         };
+
         const mods = { soft: ["Ice", "No Ice", "Light Ice"], water: ["Ice", "No Ice", "Light Ice", "Hot"], beer: ["Cup", "Can"], sparkling: ["Solo", "Mixer"], liquor: ["Neat", "Ice", "Mixer"] };
 
         function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(10); }
@@ -297,7 +309,28 @@
 
         function removeOrder(i) { let r = data[selS].orders.splice(i, 1)[0]; if (r === mealNameA) mA++; if (r === mealNameB) mB++; upInv(); render(); renderPanelOrders(); }
         function setSeatStatus(s) { haptic(); data[selS].orders.forEach(i => { if(i === mealNameA) mA++; if(i === mealNameB) mB++; }); data[selS].orders = []; data[selS].status = s; upInv(); closePanel(); }
-        function setCarrier(c) { currC = c; document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase()))); closeSub(); render(); document.getElementById('side-indicator').style.backgroundColor = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)' }[c]; }
+        
+        function setCarrier(c) { 
+            currC = c; 
+            document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase()))); 
+            closeSub(); 
+            render(); 
+            document.getElementById('side-indicator').style.backgroundColor = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)', 'AC': 'var(--ac-red)' }[c]; 
+            
+            // Dynamic Button Logic for AC
+            const btnSoda = document.getElementById('btn-soda');
+            const btnMixer = document.getElementById('btn-mixer');
+            
+            if (c === 'AC') {
+                btnSoda.innerText = 'Soft Drink ➔';
+                btnSoda.onclick = () => openSub('soda', '🥤 Soft Drinks');
+                btnMixer.style.display = 'none'; // Hides the mixer button
+            } else {
+                btnSoda.innerText = 'Soda ➔';
+                btnSoda.onclick = () => openSub('soda', '🥤 Sodas');
+                btnMixer.style.display = 'block'; // Brings it back for US airlines
+            }
+        }
         
         function quickAdd(i, fromHistory = false) { 
             haptic();
@@ -319,7 +352,7 @@
         function upC() { document.getElementById('v-c').innerText = cQ.c; document.getElementById('v-sg').innerText = cQ.sg; document.getElementById('v-sw').innerText = cQ.sw; }
         
         function saveHotDrink(p) { 
-            let l = currentHotDrink === 'Coffee' ? (currC === 'DL' ? 'Starbucks' : (currC === 'UA' ? 'illy' : 'Coffee')) : currentHotDrink; 
+            let l = currentHotDrink === 'Coffee' ? (currC === 'DL' ? 'Starbucks' : (currC === 'UA' ? 'illy' : (currC === 'AC' ? 'Lavazza' : 'Coffee'))) : currentHotDrink; 
             if (p) { addOrder(l + ((currentHotDrink === 'Coffee') ? " (Black)" : " (Plain)")); } 
             else { let opts = []; if(cQ.c) opts.push(cQ.c+' Cr'); if(cQ.sg) opts.push(cQ.sg+' Sug'); if(cQ.sw) opts.push(cQ.sw+' Swt'); addOrder(opts.length ? `${l} (${opts.join('/')})` : l); } 
             closeMod(); 
@@ -366,7 +399,7 @@
         
         window.onload = function() {
             loadState();       // 1. Pull data from phone memory
-            setCarrier(currC); // 2. Set colors (AA/DL/UA) based on memory
+            setCarrier(currC); // 2. Set colors (AA/DL/UA/AC) based on memory
             upInv();           // 3. Update meal counts
             render();          // 4. Draw the cabin map
         };
