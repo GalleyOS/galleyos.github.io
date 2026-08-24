@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TDP Tracker V1.3</title>
+    <title>TDP Tracker V1.4</title>
     <style>
         :root {
             --bg: #121212; --card: #1e1e1e; --text: #ffffff;
@@ -42,6 +42,12 @@
         
         .notes-input { background: #111; border: 1px solid #333; color: white; padding: 12px; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; min-height: 80px; resize: vertical; outline: none; font-family: inherit; }
         .notes-input:focus { border-color: var(--accent); }
+
+        /* CYA Grid Styles */
+        .cya-row { display: flex; gap: 6px; margin-bottom: 12px; }
+        .btn-mini { flex: 1; background: var(--btn-gray); border: 1px solid #444; color: white; border-radius: 6px; padding: 10px 4px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; }
+        .btn-mini:active { background: var(--accent); border-color: var(--accent); }
+        .cya-label { font-size: 11px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
 
         /* End Controls */
         .btn-email { background: var(--accent); color: white; margin-top: 10px; text-align: center; }
@@ -103,9 +109,39 @@
 
             <div class="section-title">Log Service</div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
-                <button class="action-btn btn-log" onclick="logEvent('Water Service Initiated')">💧 Log Water Service (60 min)</button>
-                <button class="action-btn btn-log" onclick="logEvent('Snack Service Initiated')">🥨 Log Snack Service (90 min)</button>
-                <button class="action-btn btn-log" onclick="logEvent('Drink Service Initiated')">🥤 Log Drink Service (120 min)</button>
+                <button class="action-btn btn-log" onclick="logEvent('💧 Water Service Initiated')">💧 Log Water Service</button>
+                <button class="action-btn btn-log" onclick="logEvent('🥨 Snack Service Initiated')">🥨 Log Snack Service</button>
+                <button class="action-btn btn-log" onclick="logEvent('🥤 Drink Service Initiated')">🥤 Log Drink Service</button>
+            </div>
+
+            <!-- BRAND NEW CYA / COMPLIANCE GRID -->
+            <div class="section-title">Compliance / CYA Log</div>
+            <div>
+                <div class="cya-label">🌡️ Cabin Temp</div>
+                <div class="cya-row">
+                    <button class="btn-mini" onclick="logEvent('Cabin Temp Checked: Comfortable')">Comfortable</button>
+                    <button class="btn-mini" onclick="logEvent('Cabin Temp Checked: Warm')">Warm</button>
+                    <button class="btn-mini" onclick="logEvent('Cabin Temp Checked: Hot')">Hot</button>
+                </div>
+
+                <div class="cya-label">🚽 Lavatory</div>
+                <div class="cya-row">
+                    <button class="btn-mini" onclick="logEvent('Lavatory Checked: Open & Stocked')">Open/Stocked</button>
+                    <button class="btn-mini" onclick="logEvent('Lavatory Checked: Closed')">Closed</button>
+                </div>
+
+                <div class="cya-label">🗣️ Pax Attitude</div>
+                <div class="cya-row">
+                    <button class="btn-mini" onclick="logEvent('Pax Attitude: Calm')">Calm</button>
+                    <button class="btn-mini" onclick="logEvent('Pax Attitude: Restless')">Restless</button>
+                    <button class="btn-mini" onclick="logEvent('Pax Attitude: Agitated')">Agitated</button>
+                </div>
+
+                <div class="cya-label">🎤 PA Updates</div>
+                <div class="cya-row">
+                    <button class="btn-mini" onclick="logEvent('PA Update Given: Flight Attendant')">FA Update</button>
+                    <button class="btn-mini" onclick="logEvent('PA Update Given: Flight Deck')">Flight Deck</button>
+                </div>
             </div>
 
             <div class="section-title">Event Log</div>
@@ -113,7 +149,7 @@
                 </div>
 
             <div class="section-title">Flight Notes</div>
-            <textarea id="tdpNotes" class="notes-input" placeholder="Cabin temp, lavatory conditions, pax temperament..." oninput="saveNotes()"></textarea>
+            <textarea id="tdpNotes" class="notes-input" placeholder="Any additional notes..." oninput="saveNotes()"></textarea>
 
             <button class="action-btn btn-email" onclick="emailTDPReport()">✉️ EMAIL NOTES TO SELF</button>
             <button class="action-btn btn-clear" onclick="clearTracker()">RESET FOR NEXT LEG</button>
@@ -228,7 +264,8 @@
             if(tdpData.logs.length === 0) {
                 logDiv.innerHTML = '<div style="color:#555; text-align:center;">No events logged yet.</div>';
             } else {
-                tdpData.logs.forEach(log => {
+                // To keep the newest events at the top, we reverse the logs for display
+                [...tdpData.logs].reverse().forEach(log => {
                     logDiv.innerHTML += `<div class="log-entry"><span>${log.text}</span><span class="log-time">${log.time}</span></div>`;
                 });
             }
