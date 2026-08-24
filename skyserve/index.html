@@ -9,7 +9,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Experimental V1.23</title>
+    <title>SkyServe Experimental V1.25</title>
     <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
@@ -116,9 +116,13 @@
         <button class="close-btn" style="background:var(--order-green); color:black;" onclick="applyLayout()">APPLY & REDRAW</button>
     </div>
   
-    <div id="mod-coffee" class="mod-panel">
+   <div id="mod-coffee" class="mod-panel">
         <h3 id="hot-title" style="text-align:center; color: var(--modifier); margin-top:0;">Prep</h3>
         <button id="hot-plain-btn" onclick="saveHotDrink(true)" style="width:100%; padding:12px; margin-bottom:10px; background:#111; color:white; border:1px solid #555; border-radius:8px; cursor: pointer; font-weight: bold;">BLACK</button>
+        
+        <!-- NEW COLD BREW BUTTON -->
+        <button id="cold-brew-btn" onclick="addColdBrew()" style="width:100%; padding:12px; margin-bottom:10px; background:#2980b9; color:white; border:none; border-radius:8px; cursor: pointer; font-weight: bold; display:none;">COLD BREW</button>
+        
         <div class="stepper-row"><span>Creamers</span><div><button class="step-btn" onclick="adj('c',-1)">-</button><span id="v-c" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('c',1)">+</button></div></div>
         <div class="stepper-row"><span>Sugars</span><div><button class="step-btn" onclick="adj('sg',-1)">-</button><span id="v-sg" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sg',1)">+</button></div></div>
         <div class="stepper-row"><span>Sweetener</span><div><button class="step-btn" onclick="adj('sw',-1)">-</button><span id="v-sw" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('sw',1)">+</button></div></div>
@@ -169,10 +173,12 @@
             
             <div id="m-ui" style="display:none;">
                 <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
+                <!-- UPDATED FOOD GRID WITH "NO MEAL" BUTTON -->
                 <div class="menu-grid" style="margin-bottom: 15px;">
-                    <button id="bA" class="menu-item small meal-btn" onclick="addMeal('A')">Meal A</button>
-                    <button id="bB" class="menu-item small meal-btn" onclick="addMeal('B')">Meal B</button>
-                    <button class="menu-item small meal-btn" style="background:#8e44ad" onclick="addOrder('Snacks')">Snacks</button>
+                    <button id="bA" class="menu-item meal-btn" onclick="addMeal('A')">Meal A</button>
+                    <button id="bB" class="menu-item meal-btn" onclick="addMeal('B')">Meal B</button>
+                    <button class="menu-item" style="background:#7f8c8d;" onclick="addOrder('No Meal ⛔')">No Meal ⛔</button>
+                    <button class="menu-item" style="background:#8e44ad;" onclick="addOrder('Snacks')">Snacks</button>
                 </div>
             </div>
             
@@ -222,7 +228,7 @@
 
         const menus = {
             AA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Sprite Zero","Ginger Ale", "Dr Pepper", "Diet Dr Pepper"], juice: ["Orange", "Apple", "Tomato", "Cranberry"], mixers: ["Club", "Lime LC","Berry LC","BMM", "Tonic", "Margarita Mix"], alc: { beer: ["Bud Light", "XX","IPA","Heineken", "Athletic"], wine: ["White Wine", "Red Wine"], sparkling: ["Prosecco"], liquor: ["Vodka", "Gin", "Rum","Baileys","Jack", "Tequila","Woodford", "Scotch"] } },
-            DL: { soda: ["Coke", "Diet Coke", "Coke Zero", "Ginger Ale","Sprite"], juice: ["OJ", "Apple", "Cranberry"], mixers: ["Club","Tonic","BMM"], alc: { beer: ["Miller Lite","Sweetwater","Voodoo Ranger"], wine: ["White","Red"], sparkling: ["Sparkling"], liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace"] } },
+            DL: { soda: ["Coke", "Diet Coke", "Coke Zero", "Ginger Ale","Sprite","Fresca"], juice: ["OJ", "Apple", "Cranberry"], mixers: ["Club","Tonic","BMM"], alc: { beer: ["Miller Lite","Sweetwater","Voodoo Ranger"], wine: ["White","Red"], sparkling: ["Sparkling"], liquor: ["Vodka","Rum","Gin","Tequila","Bourbon Cream","Scotch","Jack","Buffalo Trace"] } },
             UA: { soda: ["Coke", "Diet Coke", "Coke Zero", "Sprite", "Ginger Ale"], juice: ["Lemonade", "OJ", "Apple", "Cranberry", "Tomato"], mixers: ["Seltzer", "Tonic","AHA Blueberry", "AHA Pineapple", "BMM"], tea: ["Lemon Ginger", "Green Tea", "Black Tea"], alc: { beer: ["Michelob Ultra", "Stella", "Bell's IPA"], wine: ["White","Red", "Rose"], sparkling: ["Sparkling"], liquor: ["Vodka", "Rum", "Gin","Tequila", "Bailey's", "Jack","Bourbon", "Scotch","Espresso Martini","Vodka Spritz"] } },
             AC: { 
                 soda: ["Pepsi", "Diet Pepsi", "Pepsi Zero", "7up", "Ginger ale", "Soda Water", "Tonic Water", "Montellier", "Milk"], 
@@ -264,7 +270,7 @@
         function render() {
             const container = document.getElementById('cabin-map'); if(!container) return; container.innerHTML = '';
             let rowNums = Array.from({length: cabinRows}, (_, i) => i + 1); 
-            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
+            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA' || currC === 'AC') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
             if (isReversed) { rowNums.reverse(); seatLayout.reverse(); }
             
             rowNums.forEach(r => {
@@ -346,13 +352,38 @@
                 } 
             } else addOrder(i); 
         }
-        
-        function openHot(t) { currentHotDrink = t; cQ = {c:0, sg:0, sw:0}; upC(); document.getElementById('hot-title').innerText = t + " Prep"; document.getElementById('hot-plain-btn').innerText = (t === 'Coffee') ? 'BLACK' : 'PLAIN'; document.getElementById('mod-coffee').classList.add('active'); }
+
+        function openHot(t) { 
+            currentHotDrink = t; 
+            cQ = {c:0, sg:0, sw:0}; 
+            upC(); 
+            document.getElementById('hot-title').innerText = t + " Prep"; 
+            document.getElementById('hot-plain-btn').innerText = (t === 'Coffee') ? 'BLACK' : 'PLAIN'; 
+            
+            // Dynamic logic: Only show Cold Brew for UA Coffee
+            const cbBtn = document.getElementById('cold-brew-btn');
+            if (cbBtn) {
+                cbBtn.style.display = (currC === 'UA' && t === 'Coffee') ? 'block' : 'none';
+            }
+            
+            document.getElementById('mod-coffee').classList.add('active'); 
+        }
+
+        function addColdBrew() {
+            let opts = []; 
+            if(cQ.c) opts.push(cQ.c+' Cr'); 
+            if(cQ.sg) opts.push(cQ.sg+' Sug'); 
+            if(cQ.sw) opts.push(cQ.sw+' Swt'); 
+            addOrder(opts.length ? `Cold Brew (${opts.join('/')})` : 'Cold Brew'); 
+            closeMod(); 
+        }
+
+        // RESTORED MISSING MATH FUNCTIONS
         function adj(t, d) { cQ[t] = Math.max(0, Math.min(5, cQ[t]+d)); upC(); }
         function upC() { document.getElementById('v-c').innerText = cQ.c; document.getElementById('v-sg').innerText = cQ.sg; document.getElementById('v-sw').innerText = cQ.sw; }
         
         function saveHotDrink(p) { 
-            let l = currentHotDrink === 'Coffee' ? (currC === 'DL' ? 'Starbucks' : (currC === 'UA' ? 'illy' : (currC === 'AC' ? 'Lavazza' : 'Coffee'))) : currentHotDrink; 
+            let l = currentHotDrink; // No more brand overrides
             if (p) { addOrder(l + ((currentHotDrink === 'Coffee') ? " (Black)" : " (Plain)")); } 
             else { let opts = []; if(cQ.c) opts.push(cQ.c+' Cr'); if(cQ.sg) opts.push(cQ.sg+' Sug'); if(cQ.sw) opts.push(cQ.sw+' Swt'); addOrder(opts.length ? `${l} (${opts.join('/')})` : l); } 
             closeMod(); 
