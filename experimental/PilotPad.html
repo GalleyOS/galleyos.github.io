@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRAFT Clearance Interface</title>
+  <style>
+    :root {
+      --bg-dark: #121820;
+      --panel-bg: #1c2430;
+      --card-bg: #263342;
+      --border-color: #3b4d63;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --btn-active: #1f6feb;
+
+      /* Color Coding Channels */
+      --color-c: #58a6ff;  /* Blue */
+      --color-r: #d29922;  /* Amber */
+      --color-a: #bc8cff;  /* Purple */
+      --color-f: #3fb950;  /* Green */
+      --color-t: #f778ba;  /* Magenta / Pink */
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro Display", monospace;
+    }
+
+    body {
+      background: #0d1117;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    /* iPad Vertical Bezel & Screen */
+    .ipad-frame {
+      width: 100%;
+      max-width: 768px;
+      height: 1024px;
+      background: var(--bg-dark);
+      border: 12px solid #2d3139;
+      border-radius: 36px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    header {
+      background: #18202c;
+      padding: 12px 18px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+    }
+
+    .flight-info-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border-color);
+      color: #58a6ff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      outline: none;
+      width: 220px;
+    }
+
+    .flight-info-input::placeholder {
+      color: #485463;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-header {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-header.danger {
+      color: #ff7b72;
+    }
+
+    .btn-header.danger:hover {
+      background: #3c1e22;
+      border-color: #f85149;
+    }
+
+    /* Main Workspace */
+    .workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    /* Top Section: CRAFT Readouts */
+    .craft-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .craft-row {
+      display: flex;
+      align-items: center;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .craft-badge {
+      width: 32px;
+      height: 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      font-weight: 800;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .craft-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .craft-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .craft-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text-main);
+      font-weight: 600;
+      width: 100%;
+      text-transform: uppercase;
+    }
+
+    .craft-input::placeholder {
+      color: #3b4654;
+      font-weight: 400;
+    }
+
+    /* Color Coded Themes for CRAFT Modules */
+    .row-c .craft-badge { color: var(--color-c); border-color: var(--color-c); }
+    .row-c.selected { border-color: var(--color-c); box-shadow: 0 0 0 1px var(--color-c); background: #162436; }
+    
+    .row-r .craft-badge { color: var(--color-r); border-color: var(--color-r); }
+    .row-r.selected { border-color: var(--color-r); box-shadow: 0 0 0 1px var(--color-r); background: #2a2215; }
+    
+    .row-a .craft-badge { color: var(--color-a); border-color: var(--color-a); }
+    .row-a.selected { border-color: var(--color-a); box-shadow: 0 0 0 1px var(--color-a); background: #271f38; }
+    
+    .row-f .craft-badge { color: var(--color-f); border-color: var(--color-f); }
+    .row-f.selected { border-color: var(--color-f); box-shadow: 0 0 0 1px var(--color-f); background: #15291b; }
+    
+    .row-t .craft-badge { color: var(--color-t); border-color: var(--color-t); }
+    .row-t.selected { border-color: var(--color-t); box-shadow: 0 0 0 1px var(--color-t); background: #2d1825; }
+
+    /* Bottom Section: Controls split Left/Right */
+    .input-section {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    /* Left Panel: Scratchpad / Notes */
+    .panel-left {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: var(--card-bg);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .scratchpad-area {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 12px;
+      color: #7ee787;
+      font-size: 1rem;
+      line-height: 1.4;
+      resize: none;
+      outline: none;
+    }
+
+    .scratchpad-area::placeholder {
+      color: #354556;
+    }
+
+    /* Right Panel: Dedicated Keypads & Inputs */
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    /* Keypads Container: 2x2 Grid */
+    .keypad-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .sub-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sub-panel.panel-alt { border-color: var(--color-a); background: #1d1728; }
+    .sub-panel.panel-freq { border-color: var(--color-f); background: #122117; }
+    .sub-panel.panel-squawk { border-color: var(--color-t); background: #261420; }
+    .sub-panel.panel-route { border-color: var(--color-r); background: #2a2215; }
+
+    .sub-title {
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-3x4 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+
+    .grid-2x2-route {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .key-btn {
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      min-height: 38px;
+    }
+
+    /* Route Buttons */
+    .btn-route-quick {
+      background: #3d301b;
+      border: 1px solid var(--color-r);
+      color: #f2cc60;
+      font-size: 0.85rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .btn-route-quick:active { background: var(--color-r); color: #000; }
+
+    /* Altitude Keys */
+    .btn-alt { background: #2b1f3d; border-color: #5c3b87; color: #d2a8ff; }
+    .btn-alt:active { background: var(--color-a); color: #000; }
+
+    /* Frequency Keys */
+    .btn-freq { background: #193121; border-color: #2ea043; color: #7ee787; }
+    .btn-freq:active { background: var(--color-f); color: #000; }
+
+    /* Squawk Keys */
+    .btn-squawk { background: #391a2e; border-color: #8c366e; color: #ff9bce; }
+    .btn-squawk:active { background: var(--color-t); color: #000; }
+    .btn-squawk:disabled { background: #1c131a; border-color: #2c1d27; color: #4a3443; cursor: not-allowed; }
+
+    /* Bottom QWERTY Keyboard */
+    .keyboard {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .kb-row {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .kb-key {
+      flex: 1;
+      height: 40px; 
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .kb-key.wide {
+      flex: 1.4;
+      background: #1f2a38;
+      font-size: 0.8rem;
+    }
+
+    .kb-key:active {
+      background: var(--btn-active);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ipad-frame">
+    <!-- Header -->
+    <header>
+      <div>
+        <div class="header-title">CRAFT CLEARANCE</div>
+        <input type="text" class="flight-info-input" placeholder="CALLSIGN | ORIG &rarr; DEST">
+      </div>
+      <div class="header-actions">
+        <button class="btn-header danger" id="btn-clear-all">CLEAR ALL</button>
+        <button class="btn-header">COPY</button>
+      </div>
+    </header>
+
+    <!-- Content Workspace -->
+    <div class="workspace">
+      
+      <!-- CRAFT Fields -->
+      <div class="craft-section">
+        <div class="craft-row row-c selected" data-field="field-c">
+          <div class="craft-badge">C</div>
+          <div class="craft-details">
+            <span class="craft-label">Clearance Limit</span>
+            <input type="text" id="field-c" class="craft-input" placeholder="CLEARANCE LIMIT / DESTINATION">
+          </div>
+        </div>
+
+        <div class="craft-row row-r" data-field="field-r">
+          <div class="craft-badge">R</div>
+          <div class="craft-details">
+            <span class="craft-label">Route</span>
+            <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)">
+          </div>
+        </div>
+
+        <div class="craft-row row-a" data-field="field-a">
+          <div class="craft-badge">A</div>
+          <div class="craft-details">
+            <span class="craft-label">Altitude</span>
+            <input type="text" id="field-a" class="craft-input" placeholder="INITIAL & EXPECTED ALTITUDE">
+          </div>
+        </div>
+
+        <div class="craft-row row-f" data-field="field-f">
+          <div class="craft-badge">F</div>
+          <div class="craft-details">
+            <span class="craft-label">Departure Frequency (VHF COM)</span>
+            <input type="text" id="field-f" class="craft-input" placeholder="___.___ (AUTO-DECIMAL)">
+          </div>
+        </div>
+
+        <div class="craft-row row-t" data-field="field-t">
+          <div class="craft-badge">T</div>
+          <div class="craft-details">
+            <span class="craft-label">Transponder (Squawk)</span>
+            <input type="text" id="field-t" class="craft-input" placeholder="4-DIGIT OCTAL (0-7)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Lower Panels -->
+      <div class="input-section">
+        
+        <!-- Left: Open Scratchpad -->
+        <div class="panel-left">
+          <div class="panel-header">
+            <span>Scratchpad / Notes</span>
+            <button class="btn-header" style="padding: 4px 8px; font-size: 0.7rem;" id="btn-clear-scratch">CLEAR</button>
+          </div>
+          <textarea id="scratchpad" class="scratchpad-area" placeholder="Raw clearance shorthand notes..."></textarea>
+        </div>
+
+        <!-- Right: Control Panel, Numbers & Keyboard -->
+        <div class="panel-right">
+          
+          <!-- Color-Coded Balanced 2x2 Grid -->
+          <div class="keypad-container">
+            
+            <!-- Altitude Keypad (Top Left) -->
+            <div class="sub-panel panel-alt">
+              <div class="sub-title" style="color: var(--color-a);">ALTITUDE</div>
+              <div class="grid-3x4">
+                <button class="key-btn btn-alt" data-alt-key="7">7</button>
+                <button class="key-btn btn-alt" data-alt-key="8">8</button>
+                <button class="key-btn btn-alt" data-alt-key="9">9</button>
+                <button class="key-btn btn-alt" data-alt-key="4">4</button>
+                <button class="key-btn btn-alt" data-alt-key="5">5</button>
+                <button class="key-btn btn-alt" data-alt-key="6">6</button>
+                <button class="key-btn btn-alt" data-alt-key="1">1</button>
+                <button class="key-btn btn-alt" data-alt-key="2">2</button>
+                <button class="key-btn btn-alt" data-alt-key="3">3</button>
+                <button class="key-btn btn-alt" data-alt-key="FL">FL</button>
+                <button class="key-btn btn-alt" data-alt-key="0">0</button>
+                <button class="key-btn btn-alt" data-alt-key="000">000</button>
+              </div>
+            </div>
+
+            <!-- Frequency Keypad (Top Right) -->
+            <div class="sub-panel panel-freq">
+              <div class="sub-title" style="color: var(--color-f);">FREQ (AUTO-DECIMAL)</div>
+              <div class="grid-3x4">
+                <button class="key-btn btn-freq" data-freq-num="7">7</button>
+                <button class="key-btn btn-freq" data-freq-num="8">8</button>
+                <button class="key-btn btn-freq" data-freq-num="9">9</button>
+                <button class="key-btn btn-freq" data-freq-num="4">4</button>
+                <button class="key-btn btn-freq" data-freq-num="5">5</button>
+                <button class="key-btn btn-freq" data-freq-num="6">6</button>
+                <button class="key-btn btn-freq" data-freq-num="1">1</button>
+                <button class="key-btn btn-freq" data-freq-num="2">2</button>
+                <button class="key-btn btn-freq" data-freq-num="3">3</button>
+                <button class="key-btn btn-freq" id="btn-freq-clr" style="font-size: 0.8rem;">CLR</button>
+                <button class="key-btn btn-freq" data-freq-num="0">0</button>
+                <button class="key-btn btn-freq" id="btn-freq-back">&larr;</button>
+              </div>
+            </div>
+
+            <!-- Squawk Keypad (Bottom Left) -->
+            <div class="sub-panel panel-squawk">
+              <div class="sub-title" style="color: var(--color-t);">SQUAWK (0-7)</div>
+              <div class="grid-3x4">
+                <button class="key-btn btn-squawk" data-squawk-num="7">7</button>
+                <button class="key-btn btn-squawk" disabled>8</button>
+                <button class="key-btn btn-squawk" disabled>9</button>
+                <button class="key-btn btn-squawk" data-squawk-num="4">4</button>
+                <button class="key-btn btn-squawk" data-squawk-num="5">5</button>
+                <button class="key-btn btn-squawk" data-squawk-num="6">6</button>
+                <button class="key-btn btn-squawk" data-squawk-num="1">1</button>
+                <button class="key-btn btn-squawk" data-squawk-num="2">2</button>
+                <button class="key-btn btn-squawk" data-squawk-num="3">3</button>
+                <button class="key-btn btn-squawk" id="btn-squawk-clr" style="font-size: 0.8rem;">CLR</button>
+                <button class="key-btn btn-squawk" data-squawk-num="0">0</button>
+                <button class="key-btn btn-squawk" id="btn-squawk-back">&larr;</button>
+              </div>
+            </div>
+
+            <!-- Route Quick Modifiers (Bottom Right) -->
+            <div class="sub-panel panel-route">
+              <div class="sub-title" style="color: var(--color-r);">ROUTE INSERTS</div>
+              <div class="grid-2x2-route">
+                <button class="btn-route-quick" data-route-insert="AS FILED">AS FILED</button>
+                <button class="btn-route-quick" data-route-insert="RADAR VECTORS">VECTORS</button>
+                <button class="btn-route-quick" data-route-insert="THEN AS FILED">THEN AF</button>
+                <button class="btn-route-quick" data-route-insert="DIRECT ">DIRECT</button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom General QWERTY Keyboard -->
+          <div class="keyboard">
+            <div class="kb-row">
+              <button class="kb-key" data-key="Q">Q</button>
+              <button class="kb-key" data-key="W">W</button>
+              <button class="kb-key" data-key="E">E</button>
+              <button class="kb-key" data-key="R">R</button>
+              <button class="kb-key" data-key="T">T</button>
+              <button class="kb-key" data-key="Y">Y</button>
+              <button class="kb-key" data-key="U">U</button>
+              <button class="kb-key" data-key="I">I</button>
+              <button class="kb-key" data-key="O">O</button>
+              <button class="kb-key" data-key="P">P</button>
+            </div>
+            <div class="kb-row">
+              <button class="kb-key" data-key="A">A</button>
+              <button class="kb-key" data-key="S">S</button>
+              <button class="kb-key" data-key="D">D</button>
+              <button class="kb-key" data-key="F">F</button>
+              <button class="kb-key" data-key="G">G</button>
+              <button class="kb-key" data-key="H">H</button>
+              <button class="kb-key" data-key="J">J</button>
+              <button class="kb-key" data-key="K">K</button>
+              <button class="kb-key" data-key="L">L</button>
+            </div>
+            <div class="kb-row">
+              <button class="kb-key wide" data-key="-">-</button>
+              <button class="kb-key" data-key="Z">Z</button>
+              <button class="kb-key" data-key="X">X</button>
+              <button class="kb-key" data-key="C">C</button>
+              <button class="kb-key" data-key="V">V</button>
+              <button class="kb-key" data-key="B">B</button>
+              <button class="kb-key" data-key="N">N</button>
+              <button class="kb-key" data-key="M">M</button>
+              <button class="kb-key wide" data-action="backspace">&larr;</button>
+            </div>
+            <div class="kb-row">
+              <button class="kb-key wide" data-key="/">/</button>
+              <button class="kb-key" style="flex: 4;" data-key=" ">SPACE</button>
+              <button class="kb-key wide" data-action="next" style="background: var(--btn-active); color: #fff;">NEXT &darr;</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const craftRows = document.querySelectorAll('.craft-row');
+    const fieldC = document.getElementById('field-c');
+    const fieldR = document.getElementById('field-r');
+    const fieldA = document.getElementById('field-a');
+    const fieldF = document.getElementById('field-f');
+    const fieldT = document.getElementById('field-t');
+    const scratchpad = document.getElementById('scratchpad');
+
+    const inputs = [fieldC, fieldR, fieldA, fieldF, fieldT];
+    let activeInput = fieldC;
+
+    let freqRawDigits = '';
+    let squawkRawDigits = '';
+
+    function setActiveField(inputElement) {
+      activeInput = inputElement;
+      craftRows.forEach(row => {
+        row.classList.toggle('selected', row.dataset.field === inputElement.id);
+      });
+      activeInput.focus();
+    }
+
+    craftRows.forEach(row => {
+      row.addEventListener('click', () => {
+        const targetInput = document.getElementById(row.dataset.field);
+        setActiveField(targetInput);
+      });
+    });
+
+    inputs.forEach(input => {
+      input.addEventListener('focus', () => setActiveField(input));
+    });
+
+    scratchpad.addEventListener('focus', () => {
+      activeInput = scratchpad;
+      craftRows.forEach(row => row.classList.remove('selected'));
+    });
+
+    // 1. ROUTE QUICK BUTTONS
+    document.querySelectorAll('[data-route-insert]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.dataset.routeInsert;
+        if (fieldR.value.length > 0 && !fieldR.value.endsWith(' ') && !text.startsWith(' ')) {
+          fieldR.value += ', ' + text;
+        } else {
+          fieldR.value += text;
+        }
+        setActiveField(fieldR);
+      });
+    });
+
+    // 2. ALTITUDE KEYPAD
+    document.querySelectorAll('[data-alt-key]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const char = btn.dataset.altKey;
+        const start = fieldA.selectionStart || fieldA.value.length;
+        const end = fieldA.selectionEnd || fieldA.value.length;
+        fieldA.value = fieldA.value.substring(0, start) + char + fieldA.value.substring(end);
+        fieldA.selectionStart = fieldA.selectionEnd = start + char.length;
+        setActiveField(fieldA);
+      });
+    });
+
+    // 3. FREQUENCY AUTO-DECIMAL KEYPAD
+    function updateFrequencyField() {
+      if (freqRawDigits.length === 0) {
+        fieldF.value = '';
+      } else if (freqRawDigits.length <= 3) {
+        fieldF.value = freqRawDigits;
+      } else {
+        const integerPart = freqRawDigits.substring(0, 3);
+        const decimalPart = freqRawDigits.substring(3, 6);
+        fieldF.value = `${integerPart}.${decimalPart}`;
+      }
+    }
+
+    document.querySelectorAll('[data-freq-num]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (freqRawDigits.length < 6) {
+          freqRawDigits += btn.dataset.freqNum;
+          updateFrequencyField();
+        }
+        setActiveField(fieldF);
+      });
+    });
+
+    document.getElementById('btn-freq-clr').addEventListener('click', () => {
+      freqRawDigits = '';
+      updateFrequencyField();
+      setActiveField(fieldF);
+    });
+
+    document.getElementById('btn-freq-back').addEventListener('click', () => {
+      if (freqRawDigits.length > 0) {
+        freqRawDigits = freqRawDigits.slice(0, -1);
+        updateFrequencyField();
+      }
+      setActiveField(fieldF);
+    });
+
+    // 4. SQUAWK KEYPAD (OCTAL 0-7)
+    function updateSquawkField() {
+      fieldT.value = squawkRawDigits;
+    }
+
+    document.querySelectorAll('[data-squawk-num]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (squawkRawDigits.length < 4) {
+          squawkRawDigits += btn.dataset.squawkNum;
+          updateSquawkField();
+        }
+        setActiveField(fieldT);
+      });
+    });
+
+    document.getElementById('btn-squawk-clr').addEventListener('click', () => {
+      squawkRawDigits = '';
+      updateSquawkField();
+      setActiveField(fieldT);
+    });
+
+    document.getElementById('btn-squawk-back').addEventListener('click', () => {
+      if (squawkRawDigits.length > 0) {
+        squawkRawDigits = squawkRawDigits.slice(0, -1);
+        updateSquawkField();
+      }
+      setActiveField(fieldT);
+    });
+
+    // 5. GENERAL QWERTY KEYBOARD
+    document.querySelectorAll('[data-key]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!activeInput) return;
+        const char = btn.dataset.key;
+        const start = activeInput.selectionStart || activeInput.value.length;
+        const end = activeInput.selectionEnd || activeInput.value.length;
+        activeInput.value = activeInput.value.substring(0, start) + char + activeInput.value.substring(end);
+        activeInput.selectionStart = activeInput.selectionEnd = start + char.length;
+        activeInput.focus();
+      });
+    });
+
+    // Backspace handling
+    document.querySelectorAll('[data-action="backspace"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (!activeInput || activeInput.value.length === 0) return;
+        if (activeInput === fieldF) {
+          if (freqRawDigits.length > 0) {
+            freqRawDigits = freqRawDigits.slice(0, -1);
+            updateFrequencyField();
+          }
+          return;
+        }
+        if (activeInput === fieldT) {
+          if (squawkRawDigits.length > 0) {
+            squawkRawDigits = squawkRawDigits.slice(0, -1);
+            updateSquawkField();
+          }
+          return;
+        }
+        const start = activeInput.selectionStart;
+        const end = activeInput.selectionEnd;
+        if (start === end && start > 0) {
+          activeInput.value = activeInput.value.substring(0, start - 1) + activeInput.value.substring(end);
+          activeInput.selectionStart = activeInput.selectionEnd = start - 1;
+        } else if (start !== end) {
+          activeInput.value = activeInput.value.substring(0, start) + activeInput.value.substring(end);
+          activeInput.selectionStart = activeInput.selectionEnd = start;
+        }
+        activeInput.focus();
+      });
+    });
+
+    // Next field stepper
+    document.querySelectorAll('[data-action="next"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const currentIndex = inputs.indexOf(activeInput);
+        if (currentIndex !== -1 && currentIndex < inputs.length - 1) {
+          setActiveField(inputs[currentIndex + 1]);
+        } else {
+          setActiveField(inputs[0]);
+        }
+      });
+    });
+
+    // Header Actions
+    document.getElementById('btn-clear-all').addEventListener('click', () => {
+      inputs.forEach(input => input.value = '');
+      freqRawDigits = '';
+      squawkRawDigits = '';
+      document.querySelector('.flight-info-input').value = '';
+      scratchpad.value = '';
+      setActiveField(inputs[0]);
+    });
+
+    document.getElementById('btn-clear-scratch').addEventListener('click', () => {
+      scratchpad.value = '';
+      if (activeInput === scratchpad) scratchpad.focus();
+    });
+  </script>
+</body>
+</html>
