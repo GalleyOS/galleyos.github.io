@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>CRAFT Clearance Interface</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --bg-dark: #121820;
+      --panel-bg: #1c2430;
+      --card-bg: #263342;
+      --border-color: #3b4d63;
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --btn-active: #1f6feb;
+
+      /* Color Coding Channels */
+      --color-c: #58a6ff;
+      --color-r: #d29922;
+      --color-a: #bc8cff;
+      --color-f: #3fb950;
+      --color-t: #f778ba;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro Display", monospace;
+    }
+
+    body {
+      background: #0d1117;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .ipad-frame {
+      width: 100%;
+      max-width: 768px;
+      height: 1024px;
+      background: var(--bg-dark);
+      border: 12px solid #2d3139;
+      border-radius: 36px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      background: #18202c;
+      padding: 12px 18px;
+      border-bottom: 2px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+    }
+
+    .flight-info-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border-color);
+      color: #58a6ff;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      outline: none;
+      width: 220px;
+    }
+
+    .flight-info-input::placeholder { color: #485463; }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-header {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-header.danger { color: #ff7b72; }
+    .btn-header.danger:hover { background: #3c1e22; border-color: #f85149; }
+
+    .workspace {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .craft-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .craft-row {
+      display: flex;
+      align-items: center;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      gap: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+    }
+
+    .craft-badge {
+      width: 32px;
+      height: 32px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      font-weight: 800;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .craft-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .craft-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .craft-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1rem;
+      color: var(--text-main);
+      font-weight: 600;
+      width: 100%;
+      text-transform: uppercase;
+    }
+
+    .craft-input::placeholder { color: #3b4654; font-weight: 400; }
+
+    .row-c .craft-badge { color: var(--color-c); border-color: var(--color-c); }
+    .row-c.selected { border-color: var(--color-c); box-shadow: 0 0 0 1px var(--color-c); background: #162436; }
+    
+    .row-r .craft-badge { color: var(--color-r); border-color: var(--color-r); }
+    .row-r.selected { border-color: var(--color-r); box-shadow: 0 0 0 1px var(--color-r); background: #2a2215; }
+    
+    .row-a .craft-badge { color: var(--color-a); border-color: var(--color-a); }
+    .row-a.selected { border-color: var(--color-a); box-shadow: 0 0 0 1px var(--color-a); background: #271f38; }
+    
+    .row-f .craft-badge { color: var(--color-f); border-color: var(--color-f); }
+    .row-f.selected { border-color: var(--color-f); box-shadow: 0 0 0 1px var(--color-f); background: #15291b; }
+    
+    .row-t .craft-badge { color: var(--color-t); border-color: var(--color-t); }
+    .row-t.selected { border-color: var(--color-t); box-shadow: 0 0 0 1px var(--color-t); background: #2d1825; }
+
+    /* --- ROUTE OVERLAY DROPDOWN --- */
+    .route-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 100%;
+      background: #2a2215;
+      border: 1px solid var(--color-r);
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .route-dropdown.active {
+      display: flex;
+    }
+
+    .route-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid #3d301b;
+      color: #f2cc60;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .route-item:last-child {
+      border-bottom: none;
+    }
+
+    .route-item:active {
+      background: var(--color-r);
+      color: #000;
+    }
+
+    .route-item-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #bfa14d;
+      margin-bottom: 4px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    /* Middle Controls */
+    .middle-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .route-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 6px;
+    }
+
+    .btn-route-quick {
+      background: #3d301b;
+      border: 1px solid var(--color-r);
+      color: #f2cc60;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 36px;
+    }
+    .btn-route-quick:active { background: var(--color-r); color: #000; }
+
+    .keypad-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .sub-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sub-panel.panel-alt { border-color: var(--color-a); background: #1d1728; }
+    .sub-panel.panel-freq { border-color: var(--color-f); background: #122117; }
+    .sub-panel.panel-squawk { border-color: var(--color-t); background: #261420; }
+
+    .sub-title {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+
+    .grid-3x4 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .key-btn {
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      min-height: 36px; 
+    }
+
+    .key-spacer {
+      background: transparent;
+      border: none;
+    }
+
+    .btn-alt { background: #2b1f3d; border-color: #5c3b87; color: #d2a8ff; }
+    .btn-alt:active { background: var(--color-a); color: #000; }
+
+    .btn-freq { background: #193121; border-color: #2ea043; color: #7ee787; }
+    .btn-freq:active { background: var(--color-f); color: #000; }
+
+    .btn-squawk { background: #391a2e; border-color: #8c366e; color: #ff9bce; }
+    .btn-squawk:active { background: var(--color-t); color: #000; }
+
+    /* Bottom Canvas */
+    .canvas-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      min-height: 250px; 
+    }
+
+    .canvas-header {
+      background: var(--card-bg);
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .drawing-area {
+      flex: 1;
+      background: transparent;
+      cursor: crosshair;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="ipad-frame">
+    <header>
+      <div>
+        <div class="header-title">CRAFT CLEARANCE</div>
+        <input type="text" class="flight-info-input" id="callsign-input" placeholder="CALLSIGN | ORIG &rarr; DEST">
+      </div>
+      <div class="header-actions">
+        <button class="btn-header" id="btn-save-callsign">SAVE CALLSIGN</button>
+        <button class="btn-header danger" id="btn-clear-all">CLEAR ALL</button>
+      </div>
+    </header>
+
+    <div class="workspace">
+      
+      <div class="craft-section">
+        
+        <div class="craft-row row-c selected" data-field="field-c">
+          <div class="craft-badge">C</div>
+          <div class="craft-details">
+            <span class="craft-label">Clearance Limit</span>
+            <input type="text" id="field-c" class="craft-input" placeholder="DESTINATION / FIX (Try 'MVY' or 'GSO')">
+          </div>
+        </div>
+
+        <div class="craft-row row-r" data-field="field-r" style="position: relative;">
+          <div class="craft-badge">R</div>
+          <div class="craft-details">
+            <span class="craft-label">Route</span>
+            <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)">
+          </div>
+          <div class="route-dropdown" id="route-dropdown"></div>
+        </div>
+
+        <div class="craft-row row-a" data-field="field-a">
+          <div class="craft-badge">A</div>
+          <div class="craft-details">
+            <span class="craft-label">Altitude</span>
+            <input type="text" id="field-a" class="craft-input" placeholder="INITIAL & EXPECTED ALTITUDE">
+          </div>
+        </div>
+
+        <div class="craft-row row-f" data-field="field-f">
+          <div class="craft-badge">F</div>
+          <div class="craft-details">
+            <span class="craft-label">Departure Frequency (VHF COM)</span>
+            <input type="text" id="field-f" class="craft-input" placeholder="___.___ (AUTO-DECIMAL)">
+          </div>
+        </div>
+
+        <div class="craft-row row-t" data-field="field-t">
+          <div class="craft-badge">T</div>
+          <div class="craft-details">
+            <span class="craft-label">Transponder (Squawk)</span>
+            <input type="text" id="field-t" class="craft-input" placeholder="4-DIGIT CODE">
+          </div>
+        </div>
+      </div>
+
+      <div class="middle-controls">
+        
+        <div class="route-bar">
+          <button class="btn-route-quick" data-route-insert="AS FILED">AS FILED</button>
+          <button class="btn-route-quick" data-route-insert="RADAR VECTORS">VECTORS</button>
+          <button class="btn-route-quick" data-route-insert="THEN AS FILED">THEN AF</button>
+          <button class="btn-route-quick" data-route-insert="DIRECT ">DIRECT</button>
+        </div>
+
+        <div class="keypad-container">
+          
+          <div class="sub-panel panel-alt">
+            <div class="sub-title" style="color: var(--color-a);">ALTITUDE</div>
+            <div class="grid-3x4">
+              <button class="key-btn btn-alt" data-alt-key="7">7</button>
+              <button class="key-btn btn-alt" data-alt-key="8">8</button>
+              <button class="key-btn btn-alt" data-alt-key="9">9</button>
+              <button class="key-btn btn-alt" data-alt-key="4">4</button>
+              <button class="key-btn btn-alt" data-alt-key="5">5</button>
+              <button class="key-btn btn-alt" data-alt-key="6">6</button>
+              <button class="key-btn btn-alt" data-alt-key="1">1</button>
+              <button class="key-btn btn-alt" data-alt-key="2">2</button>
+              <button class="key-btn btn-alt" data-alt-key="3">3</button>
+              <button class="key-btn btn-alt" data-alt-key="FL">FL</button>
+              <button class="key-btn btn-alt" data-alt-key="0">0</button>
+              <button class="key-btn btn-alt" data-alt-key="000">000</button>
+            </div>
+          </div>
+
+          <div class="sub-panel panel-freq">
+            <div class="sub-title" style="color: var(--color-f);">FREQ (AUTO-DECIMAL)</div>
+            <div class="grid-3x4">
+              <button class="key-btn btn-freq" data-freq-num="7">7</button>
+              <button class="key-btn btn-freq" data-freq-num="8">8</button>
+              <button class="key-btn btn-freq" data-freq-num="9">9</button>
+              <button class="key-btn btn-freq" data-freq-num="4">4</button>
+              <button class="key-btn btn-freq" data-freq-num="5">5</button>
+              <button class="key-btn btn-freq" data-freq-num="6">6</button>
+              <button class="key-btn btn-freq" data-freq-num="1">1</button>
+              <button class="key-btn btn-freq" data-freq-num="2">2</button>
+              <button class="key-btn btn-freq" data-freq-num="3">3</button>
+              <button class="key-btn btn-freq" id="btn-freq-clr" style="font-size: 0.8rem;">CLR</button>
+              <button class="key-btn btn-freq" data-freq-num="0">0</button>
+              <button class="key-btn btn-freq" id="btn-freq-back">&larr;</button>
+            </div>
+          </div>
+
+          <div class="sub-panel panel-squawk">
+            <div class="sub-title" style="color: var(--color-t);">SQUAWK</div>
+            <div class="grid-3x4">
+              <div class="key-spacer"></div>
+              <button class="key-btn btn-squawk" data-squawk-num="7">7</button>
+              <div class="key-spacer"></div>
+              <button class="key-btn btn-squawk" data-squawk-num="4">4</button>
+              <button class="key-btn btn-squawk" data-squawk-num="5">5</button>
+              <button class="key-btn btn-squawk" data-squawk-num="6">6</button>
+              <button class="key-btn btn-squawk" data-squawk-num="1">1</button>
+              <button class="key-btn btn-squawk" data-squawk-num="2">2</button>
+              <button class="key-btn btn-squawk" data-squawk-num="3">3</button>
+              <button class="key-btn btn-squawk" id="btn-squawk-clr" style="font-size: 0.8rem;">CLR</button>
+              <button class="key-btn btn-squawk" data-squawk-num="0">0</button>
+              <button class="key-btn btn-squawk" id="btn-squawk-back">&larr;</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="canvas-container">
+        <div class="canvas-header">
+          <span>Handwritten Notes</span>
+          <button class="btn-header" style="padding: 4px 10px; font-size: 0.7rem;" id="btn-clear-canvas">ERASE ALL</button>
+        </div>
+        <canvas id="scratchpad-canvas" class="drawing-area"></canvas>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ----- TOP US COMMERCIAL AIRPORTS DATABASE -----
+    const usAirports = {
+      "ATL": "Hartsfield-Jackson Atlanta Intl",
+      "LAX": "Los Angeles Intl",
+      "DFW": "Dallas/Fort Worth Intl",
+      "DEN": "Denver Intl",
+      "ORD": "Chicago O'Hare Intl",
+      "JFK": "New York John F. Kennedy Intl",
+      "MCO": "Orlando Intl",
+      "LAS": "Las Vegas Harry Reid Intl",
+      "CLT": "Charlotte Douglas Intl",
+      "MIA": "Miami Intl",
+      "SEA": "Seattle/Tacoma Intl",
+      "EWR": "Newark Liberty Intl",
+      "SFO": "San Francisco Intl",
+      "PHX": "Phoenix Sky Harbor Intl",
+      "IAH": "George Bush Intercontinental",
+      "BOS": "Boston Logan Intl",
+      "FLL": "Fort Lauderdale/Hollywood Intl",
+      "MSP": "Minneapolis/St. Paul Intl",
+      "LGA": "New York LaGuardia",
+      "DTW": "Detroit Metropolitan",
+      "PHL": "Philadelphia Intl",
+      "SLC": "Salt Lake City Intl",
+      "DCA": "Ronald Reagan Washington National",
+      "SAN": "San Diego Intl",
+      "BWI": "Baltimore/Washington Intl",
+      "TPA": "Tampa Intl",
+      "IAD": "Washington Dulles Intl",
+      "MEM": "Memphis Intl",
+      "HNL": "Honolulu Intl",
+      "MDW": "Chicago Midway",
+      "PDX": "Portland Intl",
+      "BNA": "Nashville Intl",
+      "AUS": "Austin-Bergstrom Intl",
+      "DAL": "Dallas Love Field",
+      "STL": "St. Louis Lambert Intl",
+      "SJC": "Norman Y. Mineta San Jose Intl",
+      "HOU": "William P. Hobby",
+      "RDU": "Raleigh-Durham Intl",
+      "MSY": "Louis Armstrong New Orleans Intl",
+      "OAK": "Oakland Intl",
+      "SMF": "Sacramento Intl",
+      "MCI": "Kansas City Intl",
+      "SNA": "John Wayne",
+      "CLE": "Cleveland Hopkins Intl",
+      "SAT": "San Antonio Intl",
+      "RSW": "Southwest Florida Intl",
+      "IND": "Indianapolis Intl",
+      "PIT": "Pittsburgh Intl",
+      "CVG": "Cincinnati/Northern Kentucky Intl",
+      "SJU": "Luis Muñoz Marín Intl",
+      "CMH": "John Glenn Columbus Intl",
+      "OGG": "Kahului",
+      "MKE": "General Mitchell Intl",
+      "BDL": "Bradley Intl",
+      "ONT": "Ontario Intl",
+      "PBI": "Palm Beach Intl",
+      "JAX": "Jacksonville Intl",
+      "BUR": "Hollywood Burbank",
+      "GSO": "Piedmont Triad Intl"
+    };
+
+    // ----- NAMED COMPANY / FAA ROUTES DATABASE -----
+    const companyRoutes = {
+      "MVY": [
+        { id: "TEC NY99", route: "MERIT3 ORW PUT GON SEY V14" },
+        { id: "CDR LGA-MVY-1", route: "HAARP3 YODER DPK V16 SEY" },
+        { id: "PDR 3", route: "GAYEL1 MAD V474 HFD" }
+      ],
+      "GSO": [
+        { id: "CDR LGA-GSO-1", route: "CLIMB3 RADAR ELKNC" },
+        { id: "CDR LGA-GSO-2", route: "WHITE4 SWL J121 CHS" }
+      ],
+      "BOS": [
+        { id: "TEC BOS9", route: "ROBER2 MAD V474 HFD" },
+        { id: "CDR LGA-BOS-1", route: "NELIE3 ORW PUT" }
+      ]
+    };
+
+    // ----- FIELD MANAGEMENT -----
+    const craftRows = document.querySelectorAll('.craft-row');
+    const fieldC = document.getElementById('field-c');
+    const fieldR = document.getElementById('field-r');
+    const fieldA = document.getElementById('field-a');
+    const fieldF = document.getElementById('field-f');
+    const fieldT = document.getElementById('field-t');
+    const routeDropdown = document.getElementById('route-dropdown');
+    const inputs = [fieldC, fieldR, fieldA, fieldF, fieldT];
+    
+    let activeInput = fieldC;
+    let freqRawDigits = '';
+    let squawkRawDigits = '';
+
+    function setActiveField(inputElement) {
+      activeInput = inputElement;
+      craftRows.forEach(row => {
+        row.classList.toggle('selected', row.dataset.field === inputElement.id);
+      });
+      inputElement.focus(); 
+    }
+
+    craftRows.forEach(row => {
+      row.addEventListener('click', () => {
+        const targetInput = document.getElementById(row.dataset.field);
+        setActiveField(targetInput);
+      });
+    });
+
+    inputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        setActiveField(input);
+      });
+    });
+
+    // Auto-Expand Function logic for Airports
+    function checkAutoExpand(val) {
+      const match = val.match(/^([A-Z]{3})\s$/i);
+      if (match) {
+        const code = match[1].toUpperCase();
+        if (usAirports[code]) {
+          return `${code} - ${usAirports[code].toUpperCase()}`;
+        }
+      }
+      return val;
+    }
+
+    fieldC.addEventListener('input', () => {
+      fieldC.value = checkAutoExpand(fieldC.value);
+    });
+
+    // ----- DYNAMIC COMPANY ROUTE OVERLAY -----
+    function showCompanyRoutes() {
+      const destCode = fieldC.value.substring(0, 3).toUpperCase();
+      const routes = companyRoutes[destCode];
+      
+      if (routes && routes.length > 0) {
+        routeDropdown.innerHTML = '';
+        routes.forEach((routeObj) => {
+          const div = document.createElement('div');
+          div.className = 'route-item';
+          // Now displays the specific route ID (e.g. "CDR LGA-GSO-1") instead of "Company Route 1"
+          div.innerHTML = `<div class="route-item-title">${routeObj.id}</div><div>${routeObj.route}</div>`;
+          
+          div.addEventListener('mousedown', (e) => {
+            e.preventDefault(); 
+            fieldR.value = routeObj.route; 
+            routeDropdown.classList.remove('active');
+            setActiveField(fieldA); // Advance cursor
+          });
+          routeDropdown.appendChild(div);
+        });
+        routeDropdown.classList.add('active');
+      } else {
+        routeDropdown.classList.remove('active');
+      }
+    }
+
+    fieldR.addEventListener('focus', showCompanyRoutes);
+    
+    fieldR.addEventListener('blur', () => {
+      routeDropdown.classList.remove('active');
+    });
+
+    // ----- CUSTOM KEYPAD INPUTS -----
+
+    // 1. GENERIC ROUTE QUICK BUTTONS
+    document.querySelectorAll('[data-route-insert]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.dataset.routeInsert;
+        if (fieldR.value.length > 0 && !fieldR.value.endsWith(' ') && !text.startsWith(' ')) {
+          fieldR.value += ', ' + text;
+        } else {
+          fieldR.value += text;
+        }
+        setActiveField(fieldR);
+      });
+    });
+
+    // 2. ALTITUDE KEYPAD
+    document.querySelectorAll('[data-alt-key]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const char = btn.dataset.altKey;
+        const start = fieldA.selectionStart || fieldA.value.length;
+        const end = fieldA.selectionEnd || fieldA.value.length;
+        fieldA.value = fieldA.value.substring(0, start) + char + fieldA.value.substring(end);
+        fieldA.selectionStart = fieldA.selectionEnd = start + char.length;
+        setActiveField(fieldA);
+      });
+    });
+
+    // 3. FREQUENCY KEYPAD
+    function updateFrequencyField() {
+      if (freqRawDigits.length === 0) {
+        fieldF.value = '';
+      } else if (freqRawDigits.length <= 3) {
+        fieldF.value = freqRawDigits;
+      } else {
+        const integerPart = freqRawDigits.substring(0, 3);
+        const decimalPart = freqRawDigits.substring(3, 6);
+        fieldF.value = `${integerPart}.${decimalPart}`;
+      }
+    }
+
+    document.querySelectorAll('[data-freq-num]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (freqRawDigits.length < 6) {
+          freqRawDigits += btn.dataset.freqNum;
+          updateFrequencyField();
+        }
+        setActiveField(fieldF);
+      });
+    });
+
+    document.getElementById('btn-freq-clr').addEventListener('click', () => {
+      freqRawDigits = '';
+      updateFrequencyField();
+      setActiveField(fieldF);
+    });
+
+    document.getElementById('btn-freq-back').addEventListener('click', () => {
+      if (freqRawDigits.length > 0) {
+        freqRawDigits = freqRawDigits.slice(0, -1);
+        updateFrequencyField();
+      }
+      setActiveField(fieldF);
+    });
+
+    // 4. SQUAWK KEYPAD
+    function updateSquawkField() {
+      fieldT.value = squawkRawDigits;
+    }
+
+    document.querySelectorAll('[data-squawk-num]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (squawkRawDigits.length < 4) {
+          squawkRawDigits += btn.dataset.squawkNum;
+          updateSquawkField();
+        }
+        setActiveField(fieldT);
+      });
+    });
+
+    document.getElementById('btn-squawk-clr').addEventListener('click', () => {
+      squawkRawDigits = '';
+      updateSquawkField();
+      setActiveField(fieldT);
+    });
+
+    document.getElementById('btn-squawk-back').addEventListener('click', () => {
+      if (squawkRawDigits.length > 0) {
+        squawkRawDigits = squawkRawDigits.slice(0, -1);
+        updateSquawkField();
+      }
+      setActiveField(fieldT);
+    });
+
+    // 5. GLOBAL CLEAR
+    document.getElementById('btn-clear-all').addEventListener('click', () => {
+      inputs.forEach(input => input.value = '');
+      freqRawDigits = '';
+      squawkRawDigits = '';
+      document.querySelector('.flight-info-input').value = '';
+      clearCanvas();
+      setActiveField(inputs[0]);
+    });
+
+    // ----- DRAWING CANVAS (Apple Pencil / Touch Support) -----
+    const canvas = document.getElementById('scratchpad-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let isDrawing = false;
+
+    function resizeCanvas() {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+      tempCtx.drawImage(canvas, 0, 0);
+
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+
+      ctx.strokeStyle = '#7ee787'; 
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.drawImage(tempCanvas, 0, 0);
+    }
+
+    setTimeout(resizeCanvas, 50);
+    window.addEventListener('resize', resizeCanvas);
+
+    function getPointerPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      isDrawing = true;
+      const pos = getPointerPos(e);
+      ctx.beginPath();
+      ctx.moveTo(pos.x, pos.y);
+      e.preventDefault(); 
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!isDrawing) return;
+      const pos = getPointerPos(e);
+      ctx.lineTo(pos.x, pos.y);
+      ctx.stroke();
+      e.preventDefault();
+    });
+
+    canvas.addEventListener('pointerup', () => isDrawing = false);
+    canvas.addEventListener('pointercancel', () => isDrawing = false);
+    canvas.addEventListener('pointerout', () => isDrawing = false);
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    document.getElementById('btn-clear-canvas').addEventListener('click', clearCanvas);
+
+  </script>
+</body>
+</html>
