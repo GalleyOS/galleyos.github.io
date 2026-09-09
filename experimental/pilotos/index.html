@@ -202,7 +202,7 @@
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
       flex-direction: column;
       overflow: hidden;
-      max-height: 250px;
+      max-height: 450px; /* Increased to eliminate scrolling for most city pairs */
       overflow-y: auto;
     }
 
@@ -359,7 +359,8 @@
     <header>
       <div>
         <div class="header-title">CRAFT CLEARANCE</div>
-        <input type="text" class="flight-info-input" id="callsign-input" placeholder="CALLSIGN | ORIG &rarr; DEST">
+        <!-- Overrides added for native autocorrect blocking -->
+        <input type="text" class="flight-info-input" id="callsign-input" placeholder="CALLSIGN | ORIG &rarr; DEST" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
       </div>
       <div class="header-actions">
         <button class="btn-header" id="btn-save-callsign">SAVE CALLSIGN</button>
@@ -376,7 +377,8 @@
           <div class="craft-badge">C</div>
           <div class="craft-details">
             <span class="craft-label">Clearance Limit</span>
-            <input type="text" id="field-c" class="craft-input" placeholder="CLEARANCE LIMIT / DESTINATION">
+            <!-- Overrides added for native autocorrect blocking -->
+            <input type="text" id="field-c" class="craft-input" placeholder="CLEARANCE LIMIT / DESTINATION" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
           </div>
         </div>
 
@@ -384,7 +386,8 @@
           <div class="craft-badge">R</div>
           <div class="craft-details">
             <span class="craft-label">Route</span>
-            <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)">
+            <!-- Overrides added for native autocorrect blocking -->
+            <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
           </div>
           <!-- Dynamic Overlay Box -->
           <div class="route-dropdown" id="route-dropdown"></div>
@@ -688,16 +691,12 @@
       fieldC.value = checkAutoExpand(fieldC.value);
     });
 
-    // ----- ORIGIN PARSING AND DYNAMIC COMPANY ROUTE OVERLAY -----
-    
-    // Reads the header input (e.g. "RPA 1234 | LGA-GSO") to guess the origin
+    // ----- ORIGIN PARSING AND AUTOMATIC DESTINATION SYNC -----
     function getOriginCode() {
-      const val = document.getElementById('callsign-input').value.toUpperCase();
-      // Regex looks for any 3-letter combinations near dashes or arrows
+      const val = callsignInput.value.toUpperCase();
       const match = val.match(/([A-Z]{3})\s*[-|>]\s*([A-Z]{3})/);
       if (match) return match[1];
       
-      // Fallback: look for any valid 3-letter US airport code in the string
       const words = val.split(/[\s|>-]+/);
       for (let w of words) {
         if (w.length === 3 && usAirports[w]) return w;
@@ -705,6 +704,22 @@
       return null;
     }
 
+    // Automatically push the destination to the Clearance Limit box as you type
+    callsignInput.addEventListener('input', (e) => {
+      const val = e.target.value.toUpperCase();
+      const match = val.match(/([A-Z]{3})\s*[-|>]\s*([A-Z]{3})/);
+      
+      if (match) {
+        const dest = match[2];
+        if (usAirports[dest]) {
+          fieldC.value = `${dest} - ${usAirports[dest].toUpperCase()}`;
+        } else {
+          fieldC.value = dest;
+        }
+      }
+    });
+
+    // ----- DYNAMIC COMPANY ROUTE OVERLAY -----
     function showCompanyRoutes() {
       const destCode = fieldC.value.substring(0, 3).toUpperCase();
       const originCode = getOriginCode();
@@ -712,7 +727,6 @@
       routeDropdown.innerHTML = ''; 
       
       if (typeof routeDatabase === 'undefined') {
-        // Safe fail if the routes.js file isn't loaded
         routeDropdown.classList.remove('active');
         return;
       }
@@ -738,7 +752,6 @@
         });
         routeDropdown.classList.add('active');
       } else if (destCode.length === 3) {
-         // Helpful UI feedback when there are no routes
          const div = document.createElement('div');
          div.className = 'route-item';
          if (!originCode) {
