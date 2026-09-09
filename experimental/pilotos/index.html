@@ -188,6 +188,47 @@
     .row-t .craft-badge { color: var(--color-t); border-color: var(--color-t); }
     .row-t.selected { border-color: var(--color-t); box-shadow: 0 0 0 1px var(--color-t); background: #2d1825; }
 
+    /* --- ROUTE OVERLAY DROPDOWN --- */
+    .route-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 100%;
+      background: #2a2215;
+      border: 1px solid var(--color-r);
+      border-radius: 8px;
+      z-index: 1000;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+      flex-direction: column;
+      overflow: hidden;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .route-dropdown.active { display: flex; }
+
+    .route-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid #3d301b;
+      color: #f2cc60;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .route-item:last-child { border-bottom: none; }
+    .route-item:active { background: var(--color-r); color: #000; }
+
+    .route-item-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #bfa14d;
+      margin-bottom: 4px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
     .middle-controls {
       display: flex;
       flex-direction: column;
@@ -267,10 +308,7 @@
       min-height: 36px; 
     }
 
-    .key-spacer {
-      background: transparent;
-      border: none;
-    }
+    .key-spacer { background: transparent; border: none; }
 
     .btn-alt { background: #2b1f3d; border-color: #5c3b87; color: #d2a8ff; }
     .btn-alt:active { background: var(--color-a); color: #000; }
@@ -312,49 +350,6 @@
       touch-action: none;
     }
 
-    .keyboard {
-      background: var(--panel-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 8px 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: auto;
-    }
-
-    .kb-row {
-      display: flex;
-      justify-content: center;
-      gap: 5px;
-    }
-
-    .kb-key {
-      flex: 1;
-      height: 40px; 
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      border-radius: 4px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .kb-key.wide {
-      flex: 1.4;
-      background: #1f2a38;
-      font-size: 0.8rem;
-    }
-
-    .kb-key:active {
-      background: var(--btn-active);
-      color: #fff;
-    }
-
   </style>
 </head>
 <body>
@@ -385,19 +380,22 @@
           </div>
         </div>
 
-        <div class="craft-row row-r" data-field="field-r">
+        <div class="craft-row row-r" data-field="field-r" style="position: relative;">
           <div class="craft-badge">R</div>
           <div class="craft-details">
             <span class="craft-label">Route</span>
             <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)">
           </div>
+          <!-- Dynamic Overlay Box -->
+          <div class="route-dropdown" id="route-dropdown"></div>
         </div>
 
         <div class="craft-row row-a" data-field="field-a">
           <div class="craft-badge">A</div>
           <div class="craft-details">
             <span class="craft-label">Altitude</span>
-            <input type="text" id="field-a" class="craft-input" placeholder="INITIAL & EXPECTED ALTITUDE">
+            <!-- inputmode="none" stops the native keyboard from blocking the UI -->
+            <input type="text" id="field-a" class="craft-input" placeholder="INITIAL & EXPECTED ALTITUDE" inputmode="none">
           </div>
         </div>
 
@@ -405,7 +403,7 @@
           <div class="craft-badge">F</div>
           <div class="craft-details">
             <span class="craft-label">Departure Frequency (VHF COM)</span>
-            <input type="text" id="field-f" class="craft-input" placeholder="___.___ (AUTO-DECIMAL)">
+            <input type="text" id="field-f" class="craft-input" placeholder="___.___ (AUTO-DECIMAL)" inputmode="none">
           </div>
         </div>
 
@@ -413,7 +411,7 @@
           <div class="craft-badge">T</div>
           <div class="craft-details">
             <span class="craft-label">Transponder (Squawk)</span>
-            <input type="text" id="field-t" class="craft-input" placeholder="4-DIGIT CODE">
+            <input type="text" id="field-t" class="craft-input" placeholder="4-DIGIT CODE" inputmode="none">
           </div>
         </div>
       </div>
@@ -501,51 +499,11 @@
         <canvas id="scratchpad-canvas" class="drawing-area"></canvas>
       </div>
 
-      <!-- QWERTY Keyboard (Hidden by default, used for standard inputs) -->
-      <div class="keyboard" style="display: none;">
-        <div class="kb-row">
-          <button class="kb-key" data-key="Q">Q</button>
-          <button class="kb-key" data-key="W">W</button>
-          <button class="kb-key" data-key="E">E</button>
-          <button class="kb-key" data-key="R">R</button>
-          <button class="kb-key" data-key="T">T</button>
-          <button class="kb-key" data-key="Y">Y</button>
-          <button class="kb-key" data-key="U">U</button>
-          <button class="kb-key" data-key="I">I</button>
-          <button class="kb-key" data-key="O">O</button>
-          <button class="kb-key" data-key="P">P</button>
-        </div>
-        <div class="kb-row">
-          <button class="kb-key" data-key="A">A</button>
-          <button class="kb-key" data-key="S">S</button>
-          <button class="kb-key" data-key="D">D</button>
-          <button class="kb-key" data-key="F">F</button>
-          <button class="kb-key" data-key="G">G</button>
-          <button class="kb-key" data-key="H">H</button>
-          <button class="kb-key" data-key="J">J</button>
-          <button class="kb-key" data-key="K">K</button>
-          <button class="kb-key" data-key="L">L</button>
-        </div>
-        <div class="kb-row">
-          <button class="kb-key wide" data-key="-">-</button>
-          <button class="kb-key" data-key="Z">Z</button>
-          <button class="kb-key" data-key="X">X</button>
-          <button class="kb-key" data-key="C">C</button>
-          <button class="kb-key" data-key="V">V</button>
-          <button class="kb-key" data-key="B">B</button>
-          <button class="kb-key" data-key="N">N</button>
-          <button class="kb-key" data-key="M">M</button>
-          <button class="kb-key wide" data-action="backspace">&larr;</button>
-        </div>
-        <div class="kb-row">
-          <button class="kb-key wide" data-key="/">/</button>
-          <button class="kb-key" style="flex: 4;" data-key=" ">SPACE</button>
-          <button class="kb-key wide" data-action="next" style="background: var(--btn-active); color: #fff;">NEXT &darr;</button>
-        </div>
-      </div>
-
     </div>
   </div>
+
+  <!-- LOAD THE EXTERNAL ROUTE DATABASE HERE -->
+  <script src="routes.js"></script>
 
   <script>
     // ----- PWA SERVICE WORKER REGISTRATION -----
@@ -687,6 +645,7 @@
     const fieldA = document.getElementById('field-a');
     const fieldF = document.getElementById('field-f');
     const fieldT = document.getElementById('field-t');
+    const routeDropdown = document.getElementById('route-dropdown');
     const inputs = [fieldC, fieldR, fieldA, fieldF, fieldT];
     
     let activeInput = fieldC;
@@ -698,6 +657,8 @@
       craftRows.forEach(row => {
         row.classList.toggle('selected', row.dataset.field === inputElement.id);
       });
+      // Programmatically moving focus to trigger dropdowns
+      inputElement.focus(); 
     }
 
     craftRows.forEach(row => {
@@ -723,31 +684,80 @@
       return val;
     }
 
-    // Listener for hardware keyboards and native soft keyboard
     fieldC.addEventListener('input', () => {
       fieldC.value = checkAutoExpand(fieldC.value);
     });
 
+    // ----- ORIGIN PARSING AND DYNAMIC COMPANY ROUTE OVERLAY -----
+    
+    // Reads the header input (e.g. "RPA 1234 | LGA-GSO") to guess the origin
+    function getOriginCode() {
+      const val = document.getElementById('callsign-input').value.toUpperCase();
+      // Regex looks for any 3-letter combinations near dashes or arrows
+      const match = val.match(/([A-Z]{3})\s*[-|>]\s*([A-Z]{3})/);
+      if (match) return match[1];
+      
+      // Fallback: look for any valid 3-letter US airport code in the string
+      const words = val.split(/[\s|>-]+/);
+      for (let w of words) {
+        if (w.length === 3 && usAirports[w]) return w;
+      }
+      return null;
+    }
+
+    function showCompanyRoutes() {
+      const destCode = fieldC.value.substring(0, 3).toUpperCase();
+      const originCode = getOriginCode();
+      
+      routeDropdown.innerHTML = ''; 
+      
+      if (typeof routeDatabase === 'undefined') {
+        // Safe fail if the routes.js file isn't loaded
+        routeDropdown.classList.remove('active');
+        return;
+      }
+
+      let routes = [];
+      if (originCode && routeDatabase[originCode] && routeDatabase[originCode][destCode]) {
+        routes = routeDatabase[originCode][destCode];
+      }
+
+      if (routes && routes.length > 0) {
+        routes.forEach((routeObj) => {
+          const div = document.createElement('div');
+          div.className = 'route-item';
+          div.innerHTML = `<div class="route-item-title">${routeObj.id}</div><div>${routeObj.route}</div>`;
+          
+          div.addEventListener('mousedown', (e) => {
+            e.preventDefault(); 
+            fieldR.value = routeObj.route; 
+            routeDropdown.classList.remove('active');
+            setActiveField(fieldA); // Advance cursor
+          });
+          routeDropdown.appendChild(div);
+        });
+        routeDropdown.classList.add('active');
+      } else if (destCode.length === 3) {
+         // Helpful UI feedback when there are no routes
+         const div = document.createElement('div');
+         div.className = 'route-item';
+         if (!originCode) {
+            div.innerHTML = `<div class="route-item-title" style="color:#ff7b72;">NO ORIGIN DETECTED</div><div>Type origin in header (e.g. LGA-GSO) to see routes.</div>`;
+         } else {
+            div.innerHTML = `<div class="route-item-title" style="color:#8b949e;">NO ROUTES FOUND</div><div>No stored routes for ${originCode} &rarr; ${destCode}</div>`;
+         }
+         div.addEventListener('mousedown', (e) => e.preventDefault());
+         routeDropdown.appendChild(div);
+         routeDropdown.classList.add('active');
+      } else {
+        routeDropdown.classList.remove('active');
+      }
+    }
+
+    fieldR.addEventListener('focus', showCompanyRoutes);
+    fieldR.addEventListener('blur', () => routeDropdown.classList.remove('active'));
+
     // ----- CUSTOM KEYPAD INPUTS -----
-
-    // General string insertion for QWERTY keyboard array (if re-enabled)
-    document.querySelectorAll('[data-key]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        if (!activeInput) return;
-        const char = btn.dataset.key;
-        const start = activeInput.selectionStart || activeInput.value.length;
-        const end = activeInput.selectionEnd || activeInput.value.length;
-        activeInput.value = activeInput.value.substring(0, start) + char + activeInput.value.substring(end);
-        
-        // Auto-expand check for on-screen spacebar
-        if (activeInput === fieldC && char === ' ') {
-          activeInput.value = checkAutoExpand(activeInput.value);
-        }
-        
-        activeInput.selectionStart = activeInput.selectionEnd = activeInput.value.length;
-      });
-    });
-
 
     // 1. ROUTE QUICK BUTTONS
     document.querySelectorAll('[data-route-insert]').forEach(btn => {
