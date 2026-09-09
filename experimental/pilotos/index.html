@@ -202,7 +202,7 @@
       box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
       flex-direction: column;
       overflow: hidden;
-      max-height: 450px; /* Increased to eliminate scrolling for most city pairs */
+      max-height: 450px;
       overflow-y: auto;
     }
 
@@ -319,6 +319,7 @@
     .btn-squawk { background: #391a2e; border-color: #8c366e; color: #ff9bce; }
     .btn-squawk:active { background: var(--color-t); color: #000; }
 
+    /* Bottom Notes Area */
     .canvas-container {
       flex: 1;
       display: flex;
@@ -350,6 +351,23 @@
       touch-action: none;
     }
 
+    .text-area {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #7ee787; /* Matches the pen ink color */
+      font-size: 1.1rem;
+      padding: 12px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+      display: none; /* Hidden by default */
+    }
+    
+    .text-area::placeholder {
+      color: #3b4654;
+    }
+
   </style>
 </head>
 <body>
@@ -359,7 +377,6 @@
     <header>
       <div>
         <div class="header-title">CRAFT CLEARANCE</div>
-        <!-- Overrides added for native autocorrect blocking -->
         <input type="text" class="flight-info-input" id="callsign-input" placeholder="CALLSIGN | ORIG &rarr; DEST" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
       </div>
       <div class="header-actions">
@@ -377,7 +394,6 @@
           <div class="craft-badge">C</div>
           <div class="craft-details">
             <span class="craft-label">Clearance Limit</span>
-            <!-- Overrides added for native autocorrect blocking -->
             <input type="text" id="field-c" class="craft-input" placeholder="CLEARANCE LIMIT / DESTINATION" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
           </div>
         </div>
@@ -386,7 +402,6 @@
           <div class="craft-badge">R</div>
           <div class="craft-details">
             <span class="craft-label">Route</span>
-            <!-- Overrides added for native autocorrect blocking -->
             <input type="text" id="field-r" class="craft-input" placeholder="ROUTING (SID, FIXES, AIRWAYS)" spellcheck="false" autocorrect="off" autocomplete="off" autocapitalize="characters">
           </div>
           <!-- Dynamic Overlay Box -->
@@ -397,7 +412,6 @@
           <div class="craft-badge">A</div>
           <div class="craft-details">
             <span class="craft-label">Altitude</span>
-            <!-- inputmode="none" stops the native keyboard from blocking the UI -->
             <input type="text" id="field-a" class="craft-input" placeholder="INITIAL & EXPECTED ALTITUDE" inputmode="none">
           </div>
         </div>
@@ -493,13 +507,17 @@
         </div>
       </div>
 
-      <!-- Canvas Scratchpad -->
+      <!-- Scratchpad & Notes Area -->
       <div class="canvas-container">
         <div class="canvas-header">
-          <span>Handwritten Notes</span>
-          <button class="btn-header" style="padding: 4px 10px; font-size: 0.7rem;" id="btn-clear-canvas">ERASE ALL</button>
+          <span>Notes</span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-header" style="padding: 4px 10px; font-size: 0.7rem;" id="btn-toggle-notes">MODE: PEN</button>
+            <button class="btn-header" style="padding: 4px 10px; font-size: 0.7rem;" id="btn-clear-canvas">ERASE ALL</button>
+          </div>
         </div>
         <canvas id="scratchpad-canvas" class="drawing-area"></canvas>
+        <textarea id="scratchpad-text" class="text-area" placeholder="Type notes here..." spellcheck="false" autocorrect="off"></textarea>
       </div>
 
     </div>
@@ -660,7 +678,6 @@
       craftRows.forEach(row => {
         row.classList.toggle('selected', row.dataset.field === inputElement.id);
       });
-      // Programmatically moving focus to trigger dropdowns
       inputElement.focus(); 
     }
 
@@ -704,7 +721,6 @@
       return null;
     }
 
-    // Automatically push the destination to the Clearance Limit box as you type
     callsignInput.addEventListener('input', (e) => {
       const val = e.target.value.toUpperCase();
       const match = val.match(/([A-Z]{3})\s*[-|>]\s*([A-Z]{3})/);
@@ -772,7 +788,6 @@
 
     // ----- CUSTOM KEYPAD INPUTS -----
 
-    // 1. ROUTE QUICK BUTTONS
     document.querySelectorAll('[data-route-insert]').forEach(btn => {
       btn.addEventListener('click', () => {
         const text = btn.dataset.routeInsert;
@@ -785,7 +800,6 @@
       });
     });
 
-    // 2. ALTITUDE KEYPAD
     document.querySelectorAll('[data-alt-key]').forEach(btn => {
       btn.addEventListener('click', () => {
         const char = btn.dataset.altKey;
@@ -797,7 +811,6 @@
       });
     });
 
-    // 3. FREQUENCY KEYPAD
     function updateFrequencyField() {
       if (freqRawDigits.length === 0) {
         fieldF.value = '';
@@ -834,7 +847,6 @@
       setActiveField(fieldF);
     });
 
-    // 4. SQUAWK KEYPAD
     function updateSquawkField() {
       fieldT.value = squawkRawDigits;
     }
@@ -863,21 +875,33 @@
       setActiveField(fieldT);
     });
 
-    // 5. GLOBAL CLEAR
-    document.getElementById('btn-clear-all').addEventListener('click', () => {
-      inputs.forEach(input => input.value = '');
-      freqRawDigits = '';
-      squawkRawDigits = '';
-      clearCanvas();
-      setActiveField(inputs[0]);
+    // ----- NOTES & DRAWING CANVAS -----
+    const canvas = document.getElementById('scratchpad-canvas');
+    const scratchpadText = document.getElementById('scratchpad-text');
+    const btnToggleNotes = document.getElementById('btn-toggle-notes');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
+    let isDrawing = false;
+    let isTextMode = false;
+
+    // Toggle between Pen and Type mode
+    btnToggleNotes.addEventListener('click', () => {
+      isTextMode = !isTextMode;
+      if (isTextMode) {
+        btnToggleNotes.textContent = "MODE: TYPE";
+        canvas.style.display = 'none';
+        scratchpadText.style.display = 'block';
+        scratchpadText.focus(); // Instantly pops up the iPad keyboard
+      } else {
+        btnToggleNotes.textContent = "MODE: PEN";
+        scratchpadText.style.display = 'none';
+        canvas.style.display = 'block';
+        resizeCanvas(); // Ensure bounds are correct after being unhidden
+      }
     });
 
-    // ----- DRAWING CANVAS (Apple Pencil / Touch Support) -----
-    const canvas = document.getElementById('scratchpad-canvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    let isDrawing = false;
-
     function resizeCanvas() {
+      if (isTextMode) return; // Don't resize if hidden
       const tempCanvas = document.createElement('canvas');
       const tempCtx = tempCanvas.getContext('2d');
       tempCanvas.width = canvas.width;
@@ -927,9 +951,20 @@
 
     function clearCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      scratchpadText.value = ''; // Clears the typed text simultaneously
     }
     
     document.getElementById('btn-clear-canvas').addEventListener('click', clearCanvas);
+
+    // 5. GLOBAL CLEAR
+    document.getElementById('btn-clear-all').addEventListener('click', () => {
+      inputs.forEach(input => input.value = '');
+      freqRawDigits = '';
+      squawkRawDigits = '';
+      document.querySelector('.flight-info-input').value = '';
+      clearCanvas();
+      setActiveField(inputs[0]);
+    });
 
   </script>
 </body>
