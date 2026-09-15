@@ -9,7 +9,7 @@
     <link rel="manifest" href="/manifest.json">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SkyServe Experimental V1.25</title>
+    <title>SkyServe Experimental V1.27</title>
     <meta name="author" content="Joseph Midnight - Noktomezo">
     <style>
         :root {
@@ -31,7 +31,8 @@
         
         /* Font Button CSS Fix */
         .font-btn { background:none; border:1px solid #888; color:#888; border-radius:50%; width:26px; height:26px; font-size:11px; margin-left:8px; vertical-align: middle; font-weight:bold; transition: 0.2s; cursor: pointer; }
-        body.large-font .font-btn { background: var(--accent); color: white; border-color: white; }
+        body.large-font .font-btn { background: var(--accent); color: white; border-color: white; } 
+        body.large-font .pax-name { font-size: clamp(14px, 4vw, 18px); color: #ffffff; font-weight: bold; }
 
         .inventory-bar { display: flex; justify-content: space-around; background: #222; padding: 10px; border-bottom: 1px solid #333; font-size: 12px; }
         .inv-count { font-weight: bold; color: var(--order-green); font-size: 14px; margin-left: 5px; }
@@ -49,7 +50,7 @@
         .aisle { width: 30px; flex-shrink: 0; }
         
         .seat-label { font-weight: bold; color: var(--accent); font-size: clamp(14px, 4.5vw, 20px); }
-        .pax-name { font-size: clamp(10px, 3vw, 14px); color: #888; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pax-name { font-size: clamp(12px, 3.5vw, 16px); font-weight: bold; color: #ccc; text-align: right; flex-grow: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .order-display { font-size: clamp(10px, 3.5vw, 15px); margin-top: 4px; line-height: 1.2; color: #ddd; transition: 0.2s; word-wrap: break-word; }
         
         /* Flexbox Panel Polish */
@@ -97,21 +98,33 @@
         <button class="close-btn" onclick="closeMod()">GOT IT</button>
     </div>
 
+    <!-- UPDATED LAYOUT MODAL -->
     <div id="mod-layout" class="mod-panel">
         <h3 style="text-align:center; color: var(--accent); margin-top:0;">Cabin Layout</h3>
-        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Number of Rows</div>
-        <div class="stepper-row" style="margin-bottom: 15px;">
-            <span>FC Rows</span>
+        
+        <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Your Section</div>
+        <div class="stepper-row" style="margin-bottom: 6px;">
+            <span>Start Row</span>
             <div>
-                <button class="step-btn" onclick="adjRows(-1)">-</button>
-                <span id="v-rows" style="margin:0 15px; font-weight:bold; color:var(--accent); font-size: 18px;">4</span>
-                <button class="step-btn" onclick="adjRows(1)">+</button>
+                <button class="step-btn" onclick="adjStart(-1)">-</button>
+                <span id="v-start" style="margin:0 15px; font-weight:bold; color:var(--accent); font-size: 18px;">1</span>
+                <button class="step-btn" onclick="adjStart(1)">+</button>
             </div>
         </div>
+        <div class="stepper-row" style="margin-bottom: 15px;">
+            <span>End Row</span>
+            <div>
+                <button class="step-btn" onclick="adjEnd(-1)">-</button>
+                <span id="v-end" style="margin:0 15px; font-weight:bold; color:var(--accent); font-size: 18px;">4</span>
+                <button class="step-btn" onclick="adjEnd(1)">+</button>
+            </div>
+        </div>
+        
         <div style="font-size:12px; color:#aaa; margin-bottom: 5px; text-transform: uppercase;">Seat Pattern</div>
         <div class="menu-grid" style="margin-bottom: 15px;">
-            <button id="pat-1x2" class="menu-item" onclick="setPattern('1x2')">1 x 2 (Regional)</button>
-            <button id="pat-2x2" class="menu-item" onclick="setPattern('2x2')">2 x 2 (Mainline)</button>
+            <button id="pat-1x2" class="menu-item small" onclick="setPattern('1x2')">1x2</button>
+            <button id="pat-2x2" class="menu-item small" onclick="setPattern('2x2')">2x2</button>
+            <button id="pat-3x3" class="menu-item small" onclick="setPattern('3x3')">3x3</button>
         </div>
         <button class="close-btn" style="background:var(--order-green); color:black;" onclick="applyLayout()">APPLY & REDRAW</button>
     </div>
@@ -120,7 +133,6 @@
         <h3 id="hot-title" style="text-align:center; color: var(--modifier); margin-top:0;">Prep</h3>
         <button id="hot-plain-btn" onclick="saveHotDrink(true)" style="width:100%; padding:12px; margin-bottom:10px; background:#111; color:white; border:1px solid #555; border-radius:8px; cursor: pointer; font-weight: bold;">BLACK</button>
         
-        <!-- NEW COLD BREW BUTTON -->
         <button id="cold-brew-btn" onclick="addColdBrew()" style="width:100%; padding:12px; margin-bottom:10px; background:#2980b9; color:white; border:none; border-radius:8px; cursor: pointer; font-weight: bold; display:none;">COLD BREW</button>
         
         <div class="stepper-row"><span>Creamers</span><div><button class="step-btn" onclick="adj('c',-1)">-</button><span id="v-c" style="margin:0 15px; font-weight:bold; color:var(--modifier);">0</span><button class="step-btn" onclick="adj('c',1)">+</button></div></div>
@@ -167,13 +179,17 @@
     <div id="order-panel" class="panel">
         <div class="panel-scroll">
             <h2 id="p-title" style="margin:0; transition: color 0.3s;">Seat</h2>
-            <input type="text" id="p-name" placeholder="Pax Name" style="width:100%; padding:12px; margin:10px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+            <input type="text" id="p-name" placeholder="Pax Name" oninput="checkNameInput()" style="width:100%; padding:12px; margin:10px 0 5px 0; background:#333; color:white; border:none; border-radius:8px; box-sizing:border-box;">
+            
+            <!-- Dynamic Status Grid -->
+            <div id="pax-status-row" style="display: none; gap: 5px; margin-bottom: 10px; overflow-x: auto;">
+                <!-- JavaScript will inject the buttons here -->
+            </div>
             
             <div id="current-orders-list" style="margin-bottom: 10px;"></div>
             
             <div id="m-ui" style="display:none;">
                 <div style="font-size:10px; color:#888; margin:10px 0 5px 0;">🍱 FOOD</div>
-                <!-- UPDATED FOOD GRID WITH "NO MEAL" BUTTON -->
                 <div class="menu-grid" style="margin-bottom: 15px;">
                     <button id="bA" class="menu-item meal-btn" onclick="addMeal('A')">Meal A</button>
                     <button id="bB" class="menu-item meal-btn" onclick="addMeal('B')">Meal B</button>
@@ -219,10 +235,43 @@
     </div>
 
     <script>
+      const statusTiers = {
+            AA: ["CK", "EXP", "PRO", "PLT", "GLD", "Non-Rev"],
+            DL: ["360", "DM", "PM", "GM", "SM", "Non-Rev"],
+            UA: ["GS", "1K", "PP", "PG", "PS", "Non-Rev"],
+            AC: ["SE", "75K", "50K", "35K", "Non-Rev"]
+        };
+
+        function renderStatusBtns() {
+            const container = document.getElementById('pax-status-row');
+            container.innerHTML = '';
+            statusTiers[currC].forEach(s => {
+                const b = document.createElement('button');
+                b.style.cssText = "flex: 1; min-width: 45px; padding: 8px 4px; border-radius: 6px; background: #34495e; color: white; border: none; font-weight: bold; font-size: 11px; cursor: pointer;";
+                b.innerText = s;
+                b.onclick = () => addStatus(s);
+                container.appendChild(b);
+            });
+        }
+
+        function checkNameInput() {
+            const val = document.getElementById('p-name').value;
+            document.getElementById('pax-status-row').style.display = val.length > 0 ? 'flex' : 'none';
+        }
+
+        function addStatus(tag) {
+            const input = document.getElementById('p-name');
+            // Splits at the bullet so it replaces the old status if they tap a different one
+            let currentName = input.value.split(' • ')[0].trim();
+            input.value = currentName + ' • ' + tag;
+            input.focus();
+        }
+
+        // UPDATED VARIABLES FOR START AND END ROW
         let currC = 'AA', selS = null, data = {};
         let mA = 7, mB = 5, mealNameA = "Meal A", mealNameB = "Meal B";
         let cQ = {c:0, sg:0, sw:0}, pItem = "";
-        let currentHotDrink = "Coffee", pendingMixer = null, isReversed = false, cabinRows = 4, cabinPattern = '1x2';
+        let currentHotDrink = "Coffee", pendingMixer = null, isReversed = false, startRow = 1, endRow = 4, cabinPattern = '1x2';
         
         let otherHistory = JSON.parse(localStorage.getItem('skyServeOthers')) || [];
 
@@ -248,7 +297,7 @@
         function haptic() { if (window.navigator.vibrate) window.navigator.vibrate(10); }
 
         function saveState() { 
-            localStorage.setItem('skyServeData', JSON.stringify({ currC, data, mA, mB, mealNameA, mealNameB, isReversed, cabinRows, cabinPattern, largeFont: document.body.classList.contains('large-font') })); 
+            localStorage.setItem('skyServeData', JSON.stringify({ currC, data, mA, mB, mealNameA, mealNameB, isReversed, startRow, endRow, cabinPattern, largeFont: document.body.classList.contains('large-font') })); 
             localStorage.setItem('skyServeOthers', JSON.stringify(otherHistory));
         }
 
@@ -256,28 +305,72 @@
             const saved = localStorage.getItem('skyServeData'); 
             if (saved) { 
                 const s = JSON.parse(saved); 
-                currC = s.currC || 'AA'; data = s.data || {}; mA = s.mA ?? 7; mB = s.mB ?? 5; mealNameA = s.mealNameA || "Meal A"; mealNameB = s.mealNameB || "Meal B"; isReversed = s.isReversed || false; cabinRows = s.cabinRows || 4; cabinPattern = s.cabinPattern || '1x2'; 
+                currC = s.currC || 'AA'; data = s.data || {}; mA = s.mA ?? 7; mB = s.mB ?? 5; mealNameA = s.mealNameA || "Meal A"; mealNameB = s.mealNameB || "Meal B"; isReversed = s.isReversed || false; 
+                startRow = s.startRow ?? 1; 
+                endRow = s.endRow ?? (s.cabinRows || 4);
+                cabinPattern = s.cabinPattern || '1x2'; 
                 if (s.largeFont) document.body.classList.add('large-font'); 
             } 
         }
 
-        function openLayoutMod() { document.getElementById('v-rows').innerText = cabinRows; updatePatternUI(); document.getElementById('mod-layout').classList.add('active'); document.getElementById('overlay').style.display = 'block'; }
-        function adjRows(dir) { cabinRows = Math.max(1, Math.min(10, cabinRows + dir)); document.getElementById('v-rows').innerText = cabinRows; }
+        function openLayoutMod() { 
+            document.getElementById('v-start').innerText = startRow; 
+            document.getElementById('v-end').innerText = endRow; 
+            updatePatternUI(); 
+            document.getElementById('mod-layout').classList.add('active'); 
+            document.getElementById('overlay').style.display = 'block'; 
+        }
+
+        function adjStart(dir) { 
+            startRow = Math.max(1, Math.min(60, startRow + dir)); 
+            if (startRow > endRow) endRow = startRow; 
+            document.getElementById('v-start').innerText = startRow; 
+            document.getElementById('v-end').innerText = endRow;
+        }
+
+        function adjEnd(dir) { 
+            endRow = Math.max(1, Math.min(60, endRow + dir)); 
+            if (endRow < startRow) startRow = endRow; 
+            document.getElementById('v-start').innerText = startRow; 
+            document.getElementById('v-end').innerText = endRow;
+        }
+
         function setPattern(pat) { cabinPattern = pat; updatePatternUI(); }
-        function updatePatternUI() { ['1x2', '2x2'].forEach(p => { const b = document.getElementById('pat-' + p); b.style.background = cabinPattern === p ? 'var(--accent)' : 'var(--btn-gray)'; b.style.color = cabinPattern === p ? 'white' : '#888'; }); }
+        
+        function updatePatternUI() { 
+            ['1x2', '2x2', '3x3'].forEach(p => { 
+                const b = document.getElementById('pat-' + p); 
+                if(b) {
+                    b.style.background = cabinPattern === p ? 'var(--accent)' : 'var(--btn-gray)'; 
+                    b.style.color = cabinPattern === p ? 'white' : '#888'; 
+                }
+            }); 
+        }
+        
         function applyLayout() { closeMod(); render(); }
 
         function render() {
             const container = document.getElementById('cabin-map'); if(!container) return; container.innerHTML = '';
-            let rowNums = Array.from({length: cabinRows}, (_, i) => i + 1); 
-            let seatLayout = cabinPattern === '1x2' ? ((currC === 'DL' || currC === 'UA' || currC === 'AC') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F']) : ['A', 'B', 'aisle', 'E', 'F'];
-            if (isReversed) { rowNums.reverse(); seatLayout.reverse(); }
+            
+            let rowNums = [];
+            for (let i = startRow; i <= endRow; i++) {
+                rowNums.push(i);
+            }
+            if (isReversed) { rowNums.reverse(); }
+
+            let seatLayout;
+            if (cabinPattern === '1x2') {
+                seatLayout = (currC === 'DL' || currC === 'UA' || currC === 'AC') ? ['A', 'aisle', 'C', 'D'] : ['A', 'aisle', 'D', 'F'];
+            } else if (cabinPattern === '2x2') {
+                seatLayout = (currC === 'AA') ? ['A', 'C', 'aisle', 'D', 'F'] : ['A', 'B', 'aisle', 'C', 'D'];
+            } else {
+                seatLayout = ['A', 'B', 'C', 'aisle', 'D', 'E', 'F']; 
+            }
             
             rowNums.forEach(r => {
                 const row = document.createElement('div'); row.className = 'row';
                 seatLayout.forEach(p => {
                     if (p === 'aisle') { 
-                        // Empty Aisle Fix
                         const a = document.createElement('div');
                         a.className = 'aisle';
                         row.appendChild(a);
@@ -287,7 +380,14 @@
                         let inner = d.status === 'sleep' ? '<div class="status-icon">💤</div>' : (d.status === 'skip' ? '<div class="status-icon">✅</div>' : `<div class="order-display">${d.orders.map(i => '• ' + i).join('<br>')}</div>`);
                         const s = document.createElement('div'); s.className = `seat ${extra}`; 
                         s.onclick = () => { haptic(); openP(id); };
-                        s.innerHTML = `<div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${d.name}</span></div>${inner}`; 
+                        
+                        let displayName = d.name;
+                        if (displayName.includes(' • ')) {
+                            let nParts = displayName.split(' • ');
+                            displayName = `${nParts[0]} <span style="color: #111; background: var(--modifier); padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 6px; display: inline-block;">${nParts[1]}</span>`;
+                        }
+                        
+                        s.innerHTML = `<div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${displayName}</span></div>${inner}`; 
                         row.appendChild(s);
                     }
                 });
@@ -298,6 +398,9 @@
 
         function openP(id) { 
             selS = id; pendingMixer = null; document.getElementById('p-title').style.color = ''; document.getElementById('p-title').innerText = `Seat ${id}`; document.getElementById('p-name').value = data[id].name; 
+            
+            checkNameInput(); // Evaluates if the status buttons should show up
+            
             renderPanelOrders(); renderOthers(); closeSub(); 
             document.getElementById('overlay').style.display = 'block'; document.getElementById('order-panel').classList.add('open'); togMeal(); 
         }
@@ -320,21 +423,21 @@
             currC = c; 
             document.querySelectorAll('.carrier-btn').forEach(b => b.classList.toggle('active', b.classList.contains(c.toLowerCase()))); 
             closeSub(); 
+            renderStatusBtns(); // Updates status buttons for the selected airline
             render(); 
             document.getElementById('side-indicator').style.backgroundColor = { 'AA': 'var(--aa-red)', 'DL': 'var(--dl-blue)', 'UA': 'var(--ua-blue)', 'AC': 'var(--ac-red)' }[c]; 
             
-            // Dynamic Button Logic for AC
             const btnSoda = document.getElementById('btn-soda');
             const btnMixer = document.getElementById('btn-mixer');
             
             if (c === 'AC') {
                 btnSoda.innerText = 'Soft Drinks ➔';
                 btnSoda.onclick = () => openSub('soda', '🥤 Soft Drinks');
-                btnMixer.style.display = 'none'; // Hides the mixer button
+                btnMixer.style.display = 'none'; 
             } else {
                 btnSoda.innerText = 'Soda ➔';
                 btnSoda.onclick = () => openSub('soda', '🥤 Sodas');
-                btnMixer.style.display = 'block'; // Brings it back for US airlines
+                btnMixer.style.display = 'block'; 
             }
         }
         
@@ -360,7 +463,6 @@
             document.getElementById('hot-title').innerText = t + " Prep"; 
             document.getElementById('hot-plain-btn').innerText = (t === 'Coffee') ? 'BLACK' : 'PLAIN'; 
             
-            // Dynamic logic: Only show Cold Brew for UA Coffee
             const cbBtn = document.getElementById('cold-brew-btn');
             if (cbBtn) {
                 cbBtn.style.display = (currC === 'UA' && t === 'Coffee') ? 'block' : 'none';
@@ -378,12 +480,11 @@
             closeMod(); 
         }
 
-        // RESTORED MISSING MATH FUNCTIONS
         function adj(t, d) { cQ[t] = Math.max(0, Math.min(5, cQ[t]+d)); upC(); }
         function upC() { document.getElementById('v-c').innerText = cQ.c; document.getElementById('v-sg').innerText = cQ.sg; document.getElementById('v-sw').innerText = cQ.sw; }
         
         function saveHotDrink(p) { 
-            let l = currentHotDrink; // No more brand overrides
+            let l = currentHotDrink;
             if (p) { addOrder(l + ((currentHotDrink === 'Coffee') ? " (Black)" : " (Plain)")); } 
             else { let opts = []; if(cQ.c) opts.push(cQ.c+' Cr'); if(cQ.sg) opts.push(cQ.sg+' Sug'); if(cQ.sw) opts.push(cQ.sw+' Swt'); addOrder(opts.length ? `${l} (${opts.join('/')})` : l); } 
             closeMod(); 
@@ -429,10 +530,11 @@
         }
         
         window.onload = function() {
-            loadState();       // 1. Pull data from phone memory
-            setCarrier(currC); // 2. Set colors (AA/DL/UA/AC) based on memory
-            upInv();           // 3. Update meal counts
-            render();          // 4. Draw the cabin map
+            loadState();       
+            setCarrier(currC); 
+            renderStatusBtns();
+            upInv();           
+            render();          
         };
     </script>
 </body>
