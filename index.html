@@ -240,7 +240,7 @@
         <a href="skyserve/index.html" class="tool-card">
             <div class="icon">📱</div>
             <h2 class="tool-title">SkyServe</h2>
-            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently. Works for 1x2 and 2x2 configurations.</p>
+            <p class="tool-desc">Smart POS and order management. Take control of the aisle and map your cabin efficiently. Works for 1x2, 2x2, and 3x3 configurations.</p>
         </a>
 
         <a href="restock/index.html" class="tool-card">
@@ -274,7 +274,7 @@
         <h2 class="changelog-header"><span>🎯</span> Project Ethos</h2>
         <div class="log-notes" style="font-size: 15px; line-height: 1.8;">
             <p>
-                Welcome to GalleyOS. My name is Joseph. I started this small project one day while sitting in DCA after commuting up and waiting for my report time. I had tinkered with the idea of a way to do first class orders. I usually just did them all without writing them, but then only wrote them if the flight had meals. But then you have to keep a tally of the meals and it's a whole thing. So I had a few hours to kill and decided, hey, there must be a way to make this easier. Thus, this project was born. A simple way to take orders just by tapping. Everything pre-loaded, the most common things already in there and a way for the meal counts to be tracked for me. That has let to a few other ideas and maybe more in the future. I hope it helps you and you enjoy it.
+                Welcome to GalleyOS. My name is Joseph. I started this small project one day while sitting in DCA (LGA now) after commuting up and waiting for my report time. I had tinkered with the idea of a way to do first class orders. I usually just did them all without writing them, but then only wrote them if the flight had meals. But then you have to keep a tally of the meals and it's a whole thing. So I had a few hours to kill and decided, hey, there must be a way to make this easier. Thus, this project was born. A simple way to take orders just by tapping. Everything pre-loaded, the most common things already in there and a way for the meal counts to be tracked for me. That has let to a few other ideas and maybe more in the future. I hope it helps you and you enjoy it.
             </p>
             <p>
                 On another note - this project was started as, and will always remain, open source. It is a decision I have made and am very happy with. Open source means I am beholden to no one, there are not layers upon layers of people to slog everything down or approve anything. That being said, I am more than open to ideas and suggestions. I have found plenty myself just from using it and from fellow crew. And with it being open source anyone can copy the code, tweak it to their liking and use it. It's a win-win situation for all. I am hoping in the near future to expand this to more cabins and airlines.  But, we'll see how much learning I'm able to accomplish.
@@ -293,6 +293,20 @@
                 
                 <!-- NEW UPDATE ENTRY ADDED HERE -->
                 <div class="log-entry">
+                    <div class="log-date">September 15, 2026</div>
+                    <h3 class="log-title">GalleyOS V1.27: Main Cabin & Passenger Status Updates</h3>
+                    <div class="log-notes">
+                        Massive upgrades to take SkyServe beyond First Class, plus smart quality-of-life updates for passenger tracking.
+                        <ul>
+                            <li><strong>SkyServe (Main Cabin Engine):</strong> Swapped the generic row counter for a "Start Row" and "End Row" selector. You can now map exactly your section (e.g., Rows 8-23) without scrolling past empty seats in First Class.</li>
+                            <li><strong>SkyServe (Dynamic Pax Status):</strong> Start typing a name, and a hidden grid of status buttons will appear. The tiers automatically match your selected airline (e.g., 1K for UA, Diamond for DL, EXP for AA). Tapping one adds a slick, colorful status badge right to the passenger's seat card!</li>
+                            <li><strong>SkyServe (Aircraft Layouts):</strong> Added a 3x3 configuration button for mainline narrowbodies. Also added carrier-specific lettering logic (AA 2x2 now correctly maps to A-C | D-F).</li>
+                            <li><strong>SkyServe (UI Polish):</strong> Passenger names are now bolded and slightly larger by default so they are instantly readable in a dim cabin.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="log-entry">
                     <div class="log-date">August 24, 2026</div>
                     <h3 class="log-title">GalleyOS V1.26: User Feedback & Workflow Upgrades</h3>
                     <div class="log-notes">
@@ -300,8 +314,7 @@
                         <ul>
                             <li><strong>SkyServe (Meals):</strong> Added a "No Meal ⛔" button. Now you can quickly stamp a seat as declined without pulling from your actual A/B crew meal inventory count.</li>
                             <li><strong>SkyServe (Drinks):</strong> Added Fresca to the Delta menu and added a dynamic "Cold Brew" button for United (nested right inside the Coffee prep modal).</li>
-                          <li><strong>SkyServe (Coffee Simplification):</strong> Updated TDP App to remove times. Now you hit the button when you do which service and it logs the times for you. Also added buttons to timestamp info for your report.</li>  
-                          <li><strong>SkyServe (Coffee Simplification):</strong> Removed the background logic that converted coffee brands to "Starbucks/Illy". It now just logs as "Coffee" across all carriers to keep seat cards clean and readable.</li>
+                            <li><strong>SkyServe (Coffee Simplification):</strong> Removed the background logic that converted coffee brands to "Starbucks/Illy". It now just logs as "Coffee" across all carriers to keep seat cards clean and readable.</li>
                         </ul>
                     </div>
                 </div>
