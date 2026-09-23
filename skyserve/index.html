@@ -367,6 +367,9 @@
                 seatLayout = ['A', 'B', 'C', 'aisle', 'D', 'E', 'F']; 
             }
             
+            // FIX: Flip the seat columns horizontally if the app is reversed
+            if (isReversed) { seatLayout.reverse(); }
+            
             rowNums.forEach(r => {
                 const row = document.createElement('div'); row.className = 'row';
                 seatLayout.forEach(p => {
