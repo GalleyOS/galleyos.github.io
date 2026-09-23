@@ -384,13 +384,23 @@
                         const s = document.createElement('div'); s.className = `seat ${extra}`; 
                         s.onclick = () => { haptic(); openP(id); };
                         
+                        // Separate the name and the badge so the badge never gets cut off
                         let displayName = d.name;
+                        let badgeHTML = '';
+                        
                         if (displayName.includes(' • ')) {
                             let nParts = displayName.split(' • ');
-                            displayName = `${nParts[0]} <span style="color: #111; background: var(--modifier); padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 6px; display: inline-block;">${nParts[1]}</span>`;
+                            displayName = nParts[0]; // Just the name
+                            
+                            // Notice the flex-shrink: 0 added here!
+                            badgeHTML = `<span style="color: #111; background: var(--modifier); padding: 2px 5px; border-radius: 4px; font-size: 0.8em; margin-left: 6px; flex-shrink: 0; white-space: nowrap;">${nParts[1]}</span>`;
                         }
                         
-                        s.innerHTML = `<div style="display:flex"><span class="seat-label">${id}</span><span class="pax-name">${displayName}</span></div>${inner}`; 
+                        s.innerHTML = `<div style="display:flex; align-items: center; width: 100%;">
+                                         <span class="seat-label" style="flex-shrink: 0;">${id}</span>
+                                         <span class="pax-name">${displayName}</span>
+                                         ${badgeHTML}
+                                       </div>${inner}`; 
                         row.appendChild(s);
                     }
                 });
